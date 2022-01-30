@@ -1,0 +1,21 @@
+version: '3.2'
+services:
+  webscraper-service:
+    image: zdy120939259/web-scraper-service:${VERSION}
+    build:
+      context: ../
+      dockerfile: ./scripts/Dockerfile
+    ports:
+      - 8080:8000
+      - 8000:8000
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    environment:
+      AWS_REGION: ${AWS_REGION}
+      ENVIRONMENT: ${ENVIRONMENT}
+      JAVA_OPTS: -Dlogging.level.net.markz.webscraper.api=DEBUG
+    volumes:
+      - ~/.aws/credentials:/root/.aws/credentials:ro
+      - ./dynamicconfig.properties:/tmp/dynamicconfig.properties
+volumes: { }

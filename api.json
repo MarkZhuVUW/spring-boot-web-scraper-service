@@ -1,0 +1,98 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Spring Boot Web Scraper Service",
+    "description": "Spring Boot Web Scraper Service API",
+    "version": "${version}"
+  },
+  "paths": {
+    "/search": {
+      "get": {
+        "tags": [
+          "search"
+        ],
+        "description": "Get search results for of online shopping website",
+        "operationId": "getSearchResults",
+        "parameters": [
+          {
+            "name": "onlineShopName",
+            "in": "query",
+            "required": true,
+            "description": "Name of the online shopping provider. e.g. Countdown.",
+            "schema": {
+              "$ref": "#/components/schemas/OnlineShopDto"
+            }
+          },
+          {
+            "name": "searchString",
+            "in": "query",
+            "required": true,
+            "description": "A search string representing the item(s) you want to search for.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSearchResultsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "OnlineShopDto": {
+        "type": "string",
+        "enum": [
+          "COUNTDOWN"
+        ]
+      },
+      "OnlineShoppingItemDTO": {
+        "type": "object",
+        "properties": {
+          "onlineShop": {
+            "$ref": "#/components/schemas/OnlineShopDto"
+          },
+          "price": {
+            "type": "number",
+            "format": "double"
+          },
+          "name": {
+            "type": "string"
+          },
+          "isSaved": {
+            "type": "boolean"
+          },
+          "imageUrl": {
+            "type": "string"
+          },
+          "uuid": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique id of the item."
+          }
+        }
+      },
+      "GetSearchResultsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OnlineShoppingItemDTO"
+            }
+          }
+        }
+      }
+    }
+  }
+}

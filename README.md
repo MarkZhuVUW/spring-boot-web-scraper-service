@@ -1,1 +1,1 @@
-# spring-boot-web-scraper-microservice
+# spring-boot-web-scraper-service

@@ -1,0 +1,85 @@
+version: 2.1
+
+jobs:
+  testnbuild:
+    docker:
+      - image: cimg/openjdk:17.0.1
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "pom.xml" }} # appends cache key with a hash of pom.xml file
+      - run:
+          name: Build Spring Boot app
+          command: |
+            mvn -Pprod -f ./pom.xml clean install -DskipTests
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: v1-dependencies-{{ checksum "pom.xml" }}
+      #      - run:
+      #          name: "Run unit & integration tests"
+      #          command: mvn test
+      #      - store_test_results:
+      #          path: test-results
+      #      - store_artifacts:
+      #          path: coverage
+      #          destination: coverage
+      - run:
+          name: Copy built jar files to root folder
+          command: |
+            cp ./webscraper-api/target/*-exec.jar ./api.jar
+            cp ./webscraper-client/target/*-SNAPSHOT.jar ./client.jar
+      - persist_to_workspace:
+          root: ./
+          paths:
+            - api.jar
+            - client.jar
+
+  deploy-to-docker-hub:
+
+    machine: true
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - run:
+          name: set up env vars and push docker image to Docker Hub
+          command: |
+            echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin
+            cd ./scripts
+            chmod +x build-or-deploy.sh
+            ./build-or-deploy.sh
+
+  deploy-jar-to-github-releases:
+    docker:
+      - image: circleci/golang:1.10
+    steps:
+      - attach_workspace:
+          at: ./
+      - run:
+          name: Copy api.jar and client.jar to artifacts folder and release api.jar and client.jar to GitHub
+          command: |
+            go get github.com/tcnksm/ghr
+            VERSION=${VERSION:=0.0.1} # Update release version so that Docker Hub and GitHub can have the correct release version
+            mkdir artifacts
+            cp api.jar ./artifacts
+            cp client.jar ./artifacts
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} ./artifacts/
+
+workflows:
+  test-build-deploy:
+    jobs:
+      - testnbuild
+      - deploy-to-docker-hub:
+          requires:
+            - testnbuild
+          filters:
+            branches:
+              only: master
+      - deploy-jar-to-github-releases:
+          requires:
+            - testnbuild
+          filters:
+            branches:
+              only: master

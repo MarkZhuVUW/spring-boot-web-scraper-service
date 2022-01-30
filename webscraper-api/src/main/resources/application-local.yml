@@ -1,0 +1,42 @@
+#spring:
+#  jackson:
+#    default-property-inclusion: non_null
+#    deserialization:
+#      read-unknown-enum-values-as-null: true
+#      fail-on-unknown-properties: false
+#  jpa:
+#    properties:
+#      hibernate:
+#        show_sql: true
+#        format_sql: true
+#        order_by:
+#          default_null_ordering: last
+logging:
+  level:
+    root: DEBUG
+
+info:
+  app:
+    name: 'webscraper'
+    description: 'webscraper'
+    version: '{version}'
+server:
+  port: 8080
+  servlet:
+    context-path: '/webscraper-api'
+  compression:
+    enabled: true
+  tomcat:
+    max-threads: 400
+    mbeanregistry:
+      enabled: true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+      base-path: '/status'
+  metrics:
+    export:
+      graphite:
+        enabled: false
