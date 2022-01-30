@@ -176,6 +176,12 @@
             <artifactId>mapstruct</artifactId>
             <version>1.4.1.Final</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-site-plugin -->
+        <dependency>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-site-plugin</artifactId>
+        </dependency>
+
         <!--      web scraper tools -->
         <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
         <dependency>
