@@ -53,7 +53,10 @@
       "OnlineShopDto": {
         "type": "string",
         "enum": [
-          "COUNTDOWN"
+          "COUNTDOWN",
+          "PET_CO",
+          "THE_WAREHOUSE",
+          "GOOGLE_SHOPPING"
         ]
       },
       "OnlineShoppingItemDTO": {
@@ -62,9 +65,11 @@
           "onlineShop": {
             "$ref": "#/components/schemas/OnlineShopDto"
           },
-          "price": {
-            "type": "number",
-            "format": "double"
+          "onlineShopName": {
+            "type": "string"
+          },
+          "salePrice": {
+            "type": "string"
           },
           "name": {
             "type": "string"
@@ -77,8 +82,7 @@
           },
           "uuid": {
             "type": "string",
-            "format": "uuid",
-            "description": "Unique id of the item."
+            "description": "Unique id of the item. (In the case of Countdown it is barcode)"
           }
         }
       },

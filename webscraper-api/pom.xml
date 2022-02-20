@@ -48,10 +48,18 @@
             <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-annotations</artifactId>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp -->
         <dependency>
-            <groupId>com.squareup.okhttp</groupId>
-            <artifactId>logging-interceptor</artifactId>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/com.squareup.okio/okio -->
+        <dependency>
+            <groupId>com.squareup.okio</groupId>
+            <artifactId>okio</artifactId>
+        </dependency>
+
         <!--  Db  -->
         <!-- https://mvnrepository.com/artifact/org.springframework.data/spring-data-releasetrain -->
         <!--        <dependency>-->
@@ -95,6 +103,12 @@
         </dependency>
         <!--  Utils  -->
         <!-- https://mvnrepository.com/artifact/org.threeten/threetenbp -->
+        <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.threeten</groupId>
             <artifactId>threetenbp</artifactId>
@@ -160,28 +174,17 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>mockwebserver</artifactId>
-            <version>4.9.2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
-            <version>4.9.2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
             <version>1.4.1.Final</version>
         </dependency>
         <!--      web scraper tools -->
-        <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
+        <!-- https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-java -->
         <dependency>
-            <groupId>org.jsoup</groupId>
-            <artifactId>jsoup</artifactId>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-java</artifactId>
         </dependency>
+
     </dependencies>
     <build>
         <plugins>
@@ -207,6 +210,8 @@
                             <version>0.2.0</version>
                         </path>
                     </annotationProcessorPaths>
+                    <source>16</source>
+                    <target>16</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -326,16 +331,16 @@
         <profile>
             <id>local</id>
             <properties>
-                <resources.path>${project.basedir}/src/main/resources-local</resources.path>
+                <resources.path>${project.basedir}/src/main/resources</resources.path>
             </properties>
         </profile>
         <profile>
-            <id>service</id>
+            <id>prod</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
-                <resources.path>${project.basedir}/src/main/resources-server</resources.path>
+                <resources.path>${project.basedir}/src/main/resources</resources.path>
             </properties>
         </profile>
     </profiles>
