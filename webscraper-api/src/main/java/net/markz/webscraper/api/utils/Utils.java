@@ -7,13 +7,16 @@ import net.markz.webscraper.model.OnlineShopDto;
 import org.openqa.selenium.NoSuchElementException;
 import org.springframework.http.ResponseEntity;
 
+
+
+
 @Slf4j
-public class Utils {
+public record Utils() {
 
     public static <T> T translateWebElementException(ExceptionHandler<T> func) {
         try {
             return func.handle();
-        } catch (NoSuchElementException e) { // We don't screw up our app just because an element cannot be found.
+        } catch (NoSuchElementException e) { // swallow Element not found exception.
             log.error("NoSuchElementException thrown with message: {} and \n stack trace: {} \n exception: {}",
                     e.getMessage(), e.getStackTrace(), e);
             return null; // Indicate no element found.
@@ -25,7 +28,6 @@ public class Utils {
             case PET_CO -> SearchUrl.PET_CO;
             case THE_WAREHOUSE -> SearchUrl.THE_WAREHOUSE;
             case GOOGLE_SHOPPING -> SearchUrl.GOOGLE_SHOPPING;
-            default -> throw new UnsupportedOperationException();
         };
     }
 
@@ -37,7 +39,6 @@ public class Utils {
                     e.getMessage(), e.getStackTrace(), e);
             throw e;
         }
-
     }
 }
 

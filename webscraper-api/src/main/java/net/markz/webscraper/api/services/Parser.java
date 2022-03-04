@@ -15,11 +15,13 @@ import org.springframework.http.HttpStatus;
 
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+
 
 @Slf4j
 public record Parser() {
@@ -32,7 +34,7 @@ public record Parser() {
             case COUNTDOWN -> price
                     .replace("\\n", "")
                     .replace("\\n", "");
-            case PET_CO -> price.replace("Save up to $", "").replace("\\nFrom $", " ").split(" ")[1]; // Get sale price.
+            case PET_CO -> price.replace("Save up to $", "").replace("From $", "").split("\\n")[1]; // Get sale price.
             case THE_WAREHOUSE -> price.replace("||", ". ");
             default -> throw new UnsupportedOperationException(ERROR_PRICE_MSG + onlineShopDto);
         };
@@ -45,28 +47,12 @@ public record Parser() {
 
                 Map<String, String> map = new HashMap<>();
 
-                if(splitStr.length == 7) {
-                    map.put("name", splitStr[0]);
-                    map.put("price", splitStr[2]);
-                    map.put("onlineShopName", splitStr[4]);
-                    yield map;
-                }
-
-                if(splitStr.length == 6) {
-                    map.put("name", splitStr[0]);
-                    map.put("price", splitStr[2]);
-                    map.put("onlineShopName", splitStr[3]);
-                    yield map;
-                }
-
-                if(splitStr.length == 8) {
-                    map.put("name", splitStr[0]);
-                    map.put("price", splitStr[3]);
-                    map.put("onlineShopName", splitStr[5]);
-                    yield map;
-                }
-                log.debug("innerText for this item is shit. Discard it. InnerText: {}", str);
-                yield null;
+                map.put("name", splitStr[0]);
+                map.put("price", Arrays.stream(splitStr)
+                        .filter(s -> s.contains("$"))
+                        .reduce("", (s1, s2) -> String.format("%s+%s", s1, s2)));
+                map.put("onlineShopName", splitStr[splitStr.length - 3]);
+                yield map;
             }
             default -> throw new IllegalStateException(ERROR_INNERTEXT_MSG + onlineShopDto);
         };
@@ -110,9 +96,8 @@ public record Parser() {
                                         .name((String) item.get("name"))
                                         .salePrice(Double.toString((Double)price.get("salePrice")))
                                         .uuid((String) item.get("barcode"))
-                                        // TODO: Implement database and an api to check whether the item is
+                                        // TODO: Implement database
                                         .isSaved(false));
-                        // saved.
                     });
             return onlineShoppingItemDTOS;
         } catch (final JsonProcessingException e) {
@@ -143,7 +128,7 @@ public record Parser() {
                         .salePrice(parsePrice(OnlineShopDto.PET_CO, item.findElement(By.className("price")).getAttribute("innerText")))
                         .uuid(UUID.randomUUID().toString())
                         .imageUrl(item.findElement(By.tagName("img")).getAttribute("src"))
-                        // TODO: Implement database and an api to check whether the item is
+                        // TODO: Implement database
                         .isSaved(false)
                 )
                 .toList();
@@ -164,24 +149,29 @@ public record Parser() {
             log.debug("Looking for class name: {}, actual DOM: {}", "sh-dgr__content", webDriver.getPageSource());
             return new ArrayList<>(); // swallow WebDriver exceptions and assume no result found.
         }
+
         return items
                 .stream()
                 // Filter out dirty data structures
                 .filter(item -> parseInnerText(OnlineShopDto.GOOGLE_SHOPPING, item.getAttribute("innerText")) != null)
                 .map(item -> {
                     final var innerTextMap = parseInnerText(OnlineShopDto.GOOGLE_SHOPPING, item.getAttribute("innerText"));
+                    final var imgElement = item.findElement(By.tagName("img"));
+
                     return new OnlineShoppingItemDTO()
                             .onlineShop(OnlineShopDto.GOOGLE_SHOPPING)
                             .onlineShopName(innerTextMap.get("onlineShopName"))
                             .name(innerTextMap.get("name"))
                             .salePrice(innerTextMap.get("price"))
-                            .uuid(UUID.randomUUID().toString())
-                            .imageUrl(item.findElement(By.tagName("img")).getAttribute("src"))
-                            // TODO: Implement database and an api to check whether the item is
+                            .uuid(imgElement.getAttribute("id"))
+                            .imageUrl(imgElement.getAttribute("src"))
+                            // TODO: Implement database
                             .isSaved(false);
                 })
                 .toList();
     }
+
+
 
     public static List<OnlineShoppingItemDTO> parseTheWarehouse(@NonNull final WebDriver webDriver) {
 
@@ -201,7 +191,7 @@ public record Parser() {
                 .map(item -> {
                             String dataGtmProduct = item.getAttribute("data-gtm-product");
 
-                            Map<String, String> body = null;
+                            Map<String, String> body;
 
                             try {
                                 //noinspection unchecked
@@ -224,7 +214,7 @@ public record Parser() {
                                     .salePrice(parsePrice(OnlineShopDto.THE_WAREHOUSE, body.get("price") + "||" + body.get("promotionCallOutMessage")))
                                     .uuid(body.get("id"))
                                     .imageUrl(item.findElement(By.className("tile-image")).getAttribute("src"))
-                                    // TODO: Implement database and an api to check whether the item is
+                                    // TODO: Implement database
                                     .isSaved(false);
                         }
                 )

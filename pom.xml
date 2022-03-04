@@ -9,6 +9,9 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>net.markz</groupId>
+    <modules>
+        <module>webscraper-lambdas</module>
+    </modules>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>webscraper</artifactId>
     <version>0.0.1-SNAPSHOT</version>
@@ -25,10 +28,13 @@
         <!--  Versions  -->
         <spring.boot.version>2.5.6</spring.boot.version>
         <swagger-codegen-maven-plugin.version>3.0.20</swagger-codegen-maven-plugin.version>
-        <test-containers-version>1.16.3</test-containers-version>
+        <test-containers.version>1.16.3</test-containers.version>
         <jackson-datatype-jsr310.version>2.9.8</jackson-datatype-jsr310.version>
         <hibernate.version>5.4.12.Final</hibernate.version>
         <metrics.version>4.2.2</metrics.version>
+        <awssdk.version>2.17.142</awssdk.version>
+        <lambda-java-events.version>3.11.0</lambda-java-events.version>
+        <lambda-java-core.version>1.2.1</lambda-java-core.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -74,27 +80,41 @@
             <dependency>
                 <groupId>org.testcontainers</groupId>
                 <artifactId>testcontainers</artifactId>
-                <version>${test-containers-version}</version>
+                <version>${test-containers.version}</version>
                 <scope>test</scope>
             </dependency>
-            <!--   db  -->
-            <!-- https://mvnrepository.com/artifact/org.springframework.data/spring-data-releasetrain -->
-            <!--            <dependency>-->
-            <!--                <groupId>org.springframework.data</groupId>-->
-            <!--                <artifactId>spring-data-releasetrain</artifactId>-->
-            <!--                <version>Neumann-SR9</version>-->
-            <!--                <type>pom</type>-->
-            <!--            </dependency>-->
-            <!--            <dependency>-->
-            <!--                <groupId>com.amazonaws</groupId>-->
-            <!--                <artifactId>aws-java-sdk-dynamodb</artifactId>-->
-            <!--                <version>1.11.64</version>-->
-            <!--            </dependency>-->
-            <!--            <dependency>-->
-            <!--                <groupId>com.github.derjust</groupId>-->
-            <!--                <artifactId>spring-data-dynamodb</artifactId>-->
-            <!--                <version>5.1.0</version>-->
-            <!--            </dependency>-->
+
+            <!--            AWS      -->
+            <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-lambda-java-core -->
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-lambda-java-core</artifactId>
+                <version>${lambda-java-core.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-lambda-java-events -->
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-lambda-java-events</artifactId>
+                <version>${lambda-java-events.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>software.amazon.awssdk</groupId>
+                <artifactId>bom</artifactId>
+                <version>${awssdk.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>software.amazon.awssdk</groupId>
+                <artifactId>lambda</artifactId>
+                <version>${awssdk.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>software.amazon.awssdk</groupId>
+                <artifactId>sqs</artifactId>
+                <version>${awssdk.version}</version>
+            </dependency>
             <!--  Swagger & Codegen -->
             <dependency>
                 <groupId>io.swagger.core.v3</groupId>
@@ -156,19 +176,6 @@
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-envers</artifactId>
                 <version>${hibernate.version}</version>
-            </dependency>
-            <!--  AWS  -->
-            <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk -->
-            <!-- https://mvnrepository.com/artifact/software.amazon.awssdk/sdk-core -->
-            <dependency>
-                <groupId>com.amazonaws</groupId>
-                <artifactId>aws-java-sdk-core</artifactId>
-                <version>1.11.651</version>
-            </dependency>
-            <dependency>
-                <groupId>com.amazonaws</groupId>
-                <artifactId>aws-java-sdk-dynamodb</artifactId>
-                <version>1.11.651</version>
             </dependency>
 
             <!--  Utils  -->

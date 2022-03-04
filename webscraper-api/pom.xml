@@ -59,24 +59,6 @@
             <groupId>com.squareup.okio</groupId>
             <artifactId>okio</artifactId>
         </dependency>
-
-        <!--  Db  -->
-        <!-- https://mvnrepository.com/artifact/org.springframework.data/spring-data-releasetrain -->
-        <!--        <dependency>-->
-        <!--            <groupId>org.springframework.data</groupId>-->
-        <!--            <artifactId>spring-data-releasetrain</artifactId>-->
-        <!--            <version>Lovelace-SR16</version>-->
-        <!--            <type>pom</type>-->
-        <!--            <scope>import</scope>-->
-        <!--        </dependency>-->
-        <!--        <dependency>-->
-        <!--            <groupId>com.amazonaws</groupId>-->
-        <!--            <artifactId>aws-java-sdk-dynamodb</artifactId>-->
-        <!--        </dependency>-->
-        <!--        <dependency>-->
-        <!--            <groupId>com.github.derjust</groupId>-->
-        <!--            <artifactId>spring-data-dynamodb</artifactId>-->
-        <!--        </dependency>-->
         <!--  Logging -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
@@ -91,16 +73,6 @@
             <artifactId>logstash-logback-encoder</artifactId>
         </dependency>
 
-        <!--        AWS      -->
-        <!-- https://mvnrepository.com/artifact/software.amazon.awssdk/sdk-core -->
-        <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-dynamodb</artifactId>
-        </dependency>
         <!--  Utils  -->
         <!-- https://mvnrepository.com/artifact/org.threeten/threetenbp -->
         <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
@@ -141,6 +113,7 @@
             <artifactId>jaxws-api</artifactId>
             <version>2.3.1</version>
         </dependency>
+
         <!--  Test dependencies  -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -154,11 +127,6 @@
             <artifactId>testcontainers</artifactId>
             <scope>test</scope>
         </dependency>
-        <!--        <dependency>-->
-        <!--            <groupId>org.testcontainers</groupId>-->
-        <!--            <artifactId>postgresql</artifactId>-->
-        <!--            <scope>test</scope>-->
-        <!--        </dependency>-->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-aws-messaging</artifactId>
@@ -183,6 +151,11 @@
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-java</artifactId>
+        </dependency>
+        <!--   AWS    -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>sqs</artifactId>
         </dependency>
 
     </dependencies>

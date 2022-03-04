@@ -3,8 +3,8 @@ package net.markz.webscraper.api.controllers;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import net.markz.webscraper.api.services.SearchService;
 import net.markz.webscraper.api.SearchApiDelegate;
+import net.markz.webscraper.api.services.SearchService;
 import net.markz.webscraper.api.utils.Utils;
 import net.markz.webscraper.model.GetSearchResultsResponse;
 import net.markz.webscraper.model.OnlineShopDto;
@@ -25,6 +25,8 @@ public class SearchController implements SearchApiDelegate {
       @PathVariable("onlineShopName") @NonNull final OnlineShopDto onlineShopName,
       @PathVariable("searchString") @NonNull final String searchString) {
     return Utils.translateException(
-        () -> searchService.getSearchResults(onlineShopName, searchString));
+        () ->
+            new GetSearchResultsResponse()
+                .data(searchService.getSearchResults(onlineShopName, searchString)));
   }
 }
