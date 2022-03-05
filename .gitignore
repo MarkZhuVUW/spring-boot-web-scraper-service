@@ -18,3 +18,4 @@ log
 .idea
 *.iml
 *.ipr
+chromedriver.exe
