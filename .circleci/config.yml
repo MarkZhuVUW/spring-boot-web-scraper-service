@@ -17,14 +17,6 @@ jobs:
           paths:
             - ~/.m2
           key: v1-dependencies-{{ checksum "pom.xml" }}
-      #      - run:
-      #          name: "Run unit & integration tests"
-      #          command: mvn test
-      #      - store_test_results:
-      #          path: test-results
-      #      - store_artifacts:
-      #          path: coverage
-      #          destination: coverage
       - run:
           name: Copy built jar files to root folder
           command: |
@@ -38,7 +30,8 @@ jobs:
 
   deploy-to-docker-hub:
 
-    machine: true
+    machine:
+      image: ubuntu-2004:202111-02
     steps:
       - checkout
       - attach_workspace:

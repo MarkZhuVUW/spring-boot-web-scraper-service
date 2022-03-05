@@ -2,7 +2,7 @@
 set -e
 clear
 
-export ENVIRONMENT=${ENVIRONMENT:=local}
+export ENVIRONMENT=${ENVIRONMENT:=prod}
 export AWS_REGION=${AWS_REGION:=ap-southeast-2}
 
 

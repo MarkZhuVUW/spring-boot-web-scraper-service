@@ -15,7 +15,6 @@
         <java.version>17</java.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <newrelic.java-agent.version>6.5.0</newrelic.java-agent.version>
     </properties>
     <packaging>jar</packaging>
 
