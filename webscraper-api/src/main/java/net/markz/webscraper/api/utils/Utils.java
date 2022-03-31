@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.markz.webscraper.api.exceptions.ExceptionHandler;
 import net.markz.webscraper.api.services.SearchUrl;
 import net.markz.webscraper.model.OnlineShopDto;
+import org.apache.commons.lang3.builder.RecursiveToStringStyle;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.openqa.selenium.NoSuchElementException;
 import org.springframework.http.ResponseEntity;
 
@@ -39,6 +41,14 @@ public record Utils() {
                     e.getMessage(), e.getStackTrace(), e);
             throw e;
         }
+    }
+
+    public static String reflectionToString(Object obj) {
+        if(obj == null) {
+            return "null";
+        }
+        return ToStringBuilder.reflectionToString(obj, new RecursiveToStringStyle());
+
     }
 }
 

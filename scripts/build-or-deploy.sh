@@ -2,7 +2,7 @@
 set -e
 clear
 
-export ENVIRONMENT=${ENVIRONMENT:=prod}
+export ENVIRONMENT=${ENVIRONMENT:=local}
 export AWS_REGION=${AWS_REGION:=ap-southeast-2}
 
 
@@ -13,6 +13,10 @@ echo $AWS_REGION;
 case "$ENVIRONMENT" in
   local)
     mvn -Plocal -f ../pom.xml clean install -DskipTests
+    cp ../webscraper-api/target/*-exec.jar ../api.jar
+    export VERSION=${VERSION:=latest}
+    docker-compose rm -f
+    docker-compose up --build --force-recreate
     ;;
   test)
     echo not implemented!
@@ -23,6 +27,10 @@ case "$ENVIRONMENT" in
     export DOCKERHUB_PASSWORD=${DOCKERHUB_PASSWORD:=Mark19960630}
     export GITHUB_USERNAME=${GITHUB_USERNAME:=MarkZhuVUW}
     echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin
+    docker-compose build
+    docker-compose push
+
+    export VERSION=${VERSION:=latest} # build and push to image:latest as well.
     docker-compose build
     docker-compose push
     ;;

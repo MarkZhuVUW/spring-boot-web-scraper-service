@@ -6,7 +6,7 @@ services:
       context: ../
       dockerfile: ./scripts/Dockerfile
     ports:
-      - 8080:8000
+      - 8080:8080
       - 8000:8000
     dns:
       - 8.8.8.8
@@ -18,4 +18,12 @@ services:
     volumes:
       - ~/.aws/credentials:/root/.aws/credentials:ro
       - ./dynamicconfig.properties:/tmp/dynamicconfig.properties
+  selenium-remote-chrome-driver-service:
+    image: selenium/standalone-chrome
+    hostname: selenium-remote-chrome-driver-service
+    privileged: true
+    ports:
+      - 4444:4444
+    volumes:
+      - /dev/shm:/dev/shm
 volumes: { }

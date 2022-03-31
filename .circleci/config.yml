@@ -18,7 +18,7 @@ jobs:
             - ~/.m2
           key: v1-dependencies-{{ checksum "pom.xml" }}
       - run:
-          name: Copy built jar files to root folder
+          name: Copy relevant files to root folder
           command: |
             cp ./webscraper-api/target/*-exec.jar ./api.jar
             cp ./webscraper-client/target/*-SNAPSHOT.jar ./client.jar
@@ -54,7 +54,6 @@ jobs:
           name: Copy api.jar and client.jar to artifacts folder and release api.jar and client.jar to GitHub
           command: |
             go get github.com/tcnksm/ghr
-            VERSION=${VERSION:=0.0.1} # Update release version so that Docker Hub and GitHub can have the correct release version
             mkdir artifacts
             cp api.jar ./artifacts
             cp client.jar ./artifacts

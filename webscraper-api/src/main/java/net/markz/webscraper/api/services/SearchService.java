@@ -3,8 +3,9 @@ package net.markz.webscraper.api.services;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import net.markz.webscraper.api.daos.SearchDao;
+import net.markz.webscraper.api.daos.ISearchDao;
 import net.markz.webscraper.api.exceptions.WebscraperException;
+import net.markz.webscraper.api.parsers.ParserFactory;
 import net.markz.webscraper.api.utils.Utils;
 import net.markz.webscraper.model.OnlineShopDto;
 import net.markz.webscraper.model.OnlineShoppingItemDTO;
@@ -27,51 +28,12 @@ import java.util.List;
 @Slf4j
 public class SearchService {
 
-  private final SearchDao searchDao;
+  private final ISearchDao ISearchDao;
   private final SeleniumDriverService seleniumDriverService;
-
-  //  public OnlineShoppingItemDTO getMatchingItemSearchResults(
-  //      @NonNull final OnlineShopDto onlineShopDto, @NonNull final String searchString) {
-  //
-  //    SearchUrl searchUrl = null;
-  //    WebDriver chromeDriver = null;
-  //
-  //    try {
-  //      searchUrl = Utils.getSearchUrl(onlineShopDto);
-  //      chromeDriver = getChromeDriver(searchUrl.getSearchUrlWithPathParams(searchString));
-  //      if (searchUrl.isSelenium()) {
-  //        return MatchingItemParser.parse(onlineShopDto, null, chromeDriver);
-  //      }
-  //      if (searchUrl.isHttp()) {
-  //        return MatchingItemParser.parse(
-  //            onlineShopDto,
-  //            getHttpResp(
-  //                searchUrl.getSearchUrlWithPathParams(
-  //                    URLEncoder.QUERY.encode(searchString, StandardCharsets.UTF_8))),
-  //            null);
-  //      }
-  //      throw new WebscraperException(
-  //          HttpStatus.BAD_REQUEST, "Unsupported onlineShop: " + onlineShopDto);
-  //    } catch (URISyntaxException e) {
-  //      log.error("Failed to parse url: {}", searchUrl);
-  //      throw new WebscraperException(HttpStatus.BAD_REQUEST, e.getMessage());
-  //    } catch (IOException | InterruptedException e) {
-  //      log.info(
-  //          "Failed to make call to url: {} with OnlineShopDto: {} and searchString: {}",
-  //          searchUrl,
-  //          onlineShopDto,
-  //          searchString);
-  //      log.error("checked exception caught: {}", e.toString());
-  //      throw new WebscraperException(HttpStatus.BAD_REQUEST, e.getMessage());
-  //    } finally {
-  //      if (chromeDriver != null) {
-  //        chromeDriver.close(); // close browser after each search to save RAM.
-  //      }
-  //    }
-  //  }
+  private final ParserFactory parserFactory;
 
   public List<OnlineShoppingItemDTO> getSearchResults(
-      @NonNull final OnlineShopDto onlineShopDto, @NonNull final String searchString) {
+          @NonNull final OnlineShopDto onlineShopDto, @NonNull final String searchString) {
 
     SearchUrl searchUrl = null;
     WebDriver chromeDriver = null;
@@ -80,28 +42,31 @@ public class SearchService {
       searchUrl = Utils.getSearchUrl(onlineShopDto);
       chromeDriver = getChromeDriver(searchUrl.getSearchUrlWithPathParams(searchString));
       if (searchUrl.isSelenium()) {
-        return Parser.parse(onlineShopDto, null, chromeDriver);
+        return parserFactory
+                .getSeleniumParser(onlineShopDto)
+                .parse(chromeDriver);
       }
       if (searchUrl.isHttp()) {
-        return Parser.parse(
-            onlineShopDto,
-            getHttpResp(
-                searchUrl.getSearchUrlWithPathParams(
-                    URLEncoder.QUERY.encode(searchString, StandardCharsets.UTF_8))),
-            null);
+        return parserFactory
+                .getHttpParser(onlineShopDto)
+                .parse(
+                        getHttpResp(
+                                searchUrl.getSearchUrlWithPathParams(
+                                        URLEncoder.QUERY.encode(searchString, StandardCharsets.UTF_8))
+                        )
+                );
       }
       throw new WebscraperException(
-          HttpStatus.BAD_REQUEST, "Unsupported onlineShop: " + onlineShopDto);
+              HttpStatus.BAD_REQUEST, "Unsupported onlineShop: " + onlineShopDto);
     } catch (URISyntaxException e) {
       log.error("Failed to parse url: {}", searchUrl);
       throw new WebscraperException(HttpStatus.BAD_REQUEST, e.getMessage());
     } catch (IOException | InterruptedException e) {
       log.info(
-          "Failed to make call to url: {} with OnlineShopDto: {} and searchString: {}",
-          searchUrl,
-          onlineShopDto,
-          searchString);
-      log.error("checked exception caught: {}", e.toString());
+              "Failed to make call to url: {} with OnlineShopDto: {} and searchString: {}",
+              searchUrl,
+              onlineShopDto,
+              searchString);
       throw new WebscraperException(HttpStatus.BAD_REQUEST, e.getMessage());
     } finally {
       if (chromeDriver != null) {
@@ -111,13 +76,13 @@ public class SearchService {
   }
 
   private HttpResponse<String> getHttpResp(String searchUrl)
-      throws URISyntaxException, IOException, InterruptedException {
+          throws URISyntaxException, IOException, InterruptedException {
     final var req =
-        HttpRequest.newBuilder()
-            .uri(new URI(searchUrl))
-            .header("x-requested-with", "OnlineShopping.WebApp")
-            .GET()
-            .build();
+            HttpRequest.newBuilder()
+                    .uri(new URI(searchUrl))
+                    .header("x-requested-with", "OnlineShopping.WebApp")
+                    .GET()
+                    .build();
 
     return HttpClient.newBuilder().build().send(req, HttpResponse.BodyHandlers.ofString());
   }
