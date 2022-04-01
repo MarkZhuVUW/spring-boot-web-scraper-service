@@ -42,7 +42,7 @@ jobs:
             echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin
             cd ./scripts
             chmod +x deploy-docker-hub.sh
-            ./deploy-docker-hub
+            ./deploy-docker-hub.sh
 
   deploy-jar-to-github-releases:
     docker:
@@ -54,6 +54,7 @@ jobs:
       - run:
           name: Copy api.jar and client.jar to artifacts folder and release api.jar and client.jar to GitHub
           command: |
+            ls
             cd ./scripts
             chmod +x deploy-github-releases.sh
             ./deploy-github-releases.sh
@@ -64,9 +65,12 @@ workflows:
       - deploy-to-docker-hub:
           requires:
             - testnbuild
-          filters:
-            branches:
-              only: master
+#          filters:
+#            branches:
+#              only: master
       - deploy-jar-to-github-releases:
           requires:
             - testnbuild
+#          filters:
+#            branches:
+#              only: master
