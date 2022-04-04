@@ -54,7 +54,6 @@ jobs:
       - run:
           name: Copy api.jar and client.jar to artifacts folder and release api.jar and client.jar to GitHub
           command: |
-            ls
             cd ./scripts
             chmod +x deploy-github-releases.sh
             ./deploy-github-releases.sh
