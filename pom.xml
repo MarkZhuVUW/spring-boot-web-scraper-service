@@ -341,7 +341,6 @@
             </properties>
             <modules>
                 <module>webscraper-api</module>
-                <module>webscraper-client</module>
             </modules>
         </profile>
 

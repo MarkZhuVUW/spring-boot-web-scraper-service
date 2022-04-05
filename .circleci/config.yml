@@ -21,12 +21,10 @@ jobs:
           name: Copy relevant files to root folder
           command: |
             cp ./webscraper-api/target/*-exec.jar ./api.jar
-            cp ./webscraper-client/target/*-SNAPSHOT.jar ./client.jar
       - persist_to_workspace:
           root: ./
           paths:
             - api.jar
-            - client.jar
 
   deploy-to-docker-hub:
 
@@ -41,24 +39,22 @@ jobs:
           command: |
             echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin
             cd ./scripts
-            chmod +x build-or-deploy.sh
-            ./build-or-deploy.sh
+            chmod +x deploy-docker-hub.sh
+            ./deploy-docker-hub.sh
 
   deploy-jar-to-github-releases:
     docker:
       - image: circleci/golang:1.10
     steps:
+      - checkout
       - attach_workspace:
           at: ./
       - run:
-          name: Copy api.jar and client.jar to artifacts folder and release api.jar and client.jar to GitHub
+          name: Copy api.jar to artifacts folder and release it to GitHub
           command: |
-            go get github.com/tcnksm/ghr
-            mkdir artifacts
-            cp api.jar ./artifacts
-            cp client.jar ./artifacts
-            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} ./artifacts/
-
+            cd ./scripts
+            chmod +x deploy-github-releases.sh
+            ./deploy-github-releases.sh
 workflows:
   test-build-deploy:
     jobs:
@@ -66,12 +62,12 @@ workflows:
       - deploy-to-docker-hub:
           requires:
             - testnbuild
-          filters:
-            branches:
-              only: master
+#          filters:
+#            branches:
+#              only: master
       - deploy-jar-to-github-releases:
           requires:
             - testnbuild
-          filters:
-            branches:
-              only: master
+#          filters:
+#            branches:
+#              only: master
