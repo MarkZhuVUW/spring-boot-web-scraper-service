@@ -11,6 +11,10 @@ services:
     dns:
       - 8.8.8.8
       - 8.8.4.4
+    depends_on:
+      - selenium-remote-chrome-driver-service
+    links:
+      - selenium-remote-chrome-driver-service:selenium-remote-chrome-driver-service
     environment:
       AWS_REGION: ${AWS_REGION}
       ENVIRONMENT: ${ENVIRONMENT}
