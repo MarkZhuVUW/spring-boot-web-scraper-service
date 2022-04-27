@@ -16,20 +16,12 @@ public class ParserFactory {
     private final PetCoParser petCoParser;
     private final TheWarehouseParser theWarehouseParser;
 
-    public IHttpParser getHttpParser(final OnlineShopDto onlineShopDto) {
-        return switch (onlineShopDto) {
-            case COUNTDOWN -> countdownParser;
-            default -> throw new UnsupportedOperationException(ERROR_MSG + onlineShopDto);
-        };
-    }
-
     public ISeleniumParser getSeleniumParser(final OnlineShopDto onlineShopDto) {
         return switch (onlineShopDto) {
             case PET_CO -> petCoParser;
             case THE_WAREHOUSE -> theWarehouseParser;
             case GOOGLE_SHOPPING -> googleShoppingParser;
-
-            default -> throw new UnsupportedOperationException(ERROR_MSG + onlineShopDto);
+            case COUNTDOWN -> countdownParser;
         };
     }
 

@@ -6,28 +6,31 @@ services:
       context: ../
       dockerfile: ./scripts/Dockerfile
     ports:
-      - 8080:8080
+      - 80:80
       - 8000:8000
     dns:
       - 8.8.8.8
       - 8.8.4.4
     depends_on:
       - selenium-remote-chrome-driver-service
-    links:
-      - selenium-remote-chrome-driver-service:selenium-remote-chrome-driver-service
     environment:
-      AWS_REGION: ${AWS_REGION}
-      ENVIRONMENT: ${ENVIRONMENT}
-      JAVA_OPTS: -Dlogging.level.net.markz.webscraper.api=DEBUG
+      JAVA_OPTS: -Dlogging.level.net.markz.webscraper.api=DEBUG -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8000
+
     volumes:
       - ~/.aws/credentials:/root/.aws/credentials:ro
       - ./dynamicconfig.properties:/tmp/dynamicconfig.properties
+    networks:
+      - webscraper-selenium-service
   selenium-remote-chrome-driver-service:
     image: selenium/standalone-chrome
-    hostname: selenium-remote-chrome-driver-service
     privileged: true
     ports:
       - 4444:4444
     volumes:
       - /dev/shm:/dev/shm
+    networks:
+      - webscraper-selenium-service
+networks:
+  webscraper-selenium-service:
+    driver: bridge
 volumes: { }

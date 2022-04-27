@@ -6,5 +6,5 @@ import org.openqa.selenium.WebDriver;
 import java.util.List;
 
 public interface ISeleniumParser {
-    List<OnlineShoppingItemDTO> parse(final WebDriver webDriver);
+    List<OnlineShoppingItemDTO> parse(WebDriver webDriver);
 }

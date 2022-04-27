@@ -80,6 +80,9 @@
           "imageUrl": {
             "type": "string"
           },
+          "href": {
+            "type": "string"
+          },
           "uuid": {
             "type": "string",
             "description": "Unique id of the item. (In the case of Countdown it is barcode)"

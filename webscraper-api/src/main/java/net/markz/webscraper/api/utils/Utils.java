@@ -13,14 +13,13 @@ import org.springframework.http.ResponseEntity;
 
 
 @Slf4j
-public record Utils() {
+public final record Utils() {
 
     public static <T> T translateWebElementException(ExceptionHandler<T> func) {
         try {
             return func.handle();
         } catch (NoSuchElementException e) { // swallow Element not found exception.
-            log.error("NoSuchElementException thrown with message: {} and \n stack trace: {} \n exception: {}",
-                    e.getMessage(), e.getStackTrace(), e);
+            log.error("NoSuchElementException thrown: {}", e.toString());
             return null; // Indicate no element found.
         }
     }
@@ -37,8 +36,7 @@ public record Utils() {
         try {
             return ResponseEntity.ok(func.handle());
         } catch (RuntimeException e) { // log all runtime exceptions thrown and re-throw it.
-            log.error("RuntimeException thrown with message: {} \n stack trace: {} \n exception: {}",
-                    e.getMessage(), e.getStackTrace(), e);
+            log.error("RuntimeException thrown: {}", e.toString());
             throw e;
         }
     }

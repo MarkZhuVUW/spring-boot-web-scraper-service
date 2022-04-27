@@ -27,7 +27,6 @@ jobs:
             - api.jar
 
   deploy-to-docker-hub:
-
     machine:
       image: ubuntu-2004:202111-02
     steps:
@@ -55,6 +54,30 @@ jobs:
             cd ./scripts
             chmod +x deploy-github-releases.sh
             ./deploy-github-releases.sh
+  deploy-ecs:
+    machine:
+      image: ubuntu-2004:202111-02
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - run:
+          name: AWS configure
+          command: |
+            mkdir ~/.aws
+            chmod -R 755 ~/.aws
+            cp .circleci/aws_config ~/.aws/config
+      - run:
+          name: Install aws cli through python to always get the latest verison
+          command: |
+            sudo apt-get update
+            sudo apt-get install awscli
+      - run:
+          name: assume role and force update ecs service to get latest change in docker image.
+          command: |
+            cd ./scripts
+            chmod +x deploy-ecs.sh
+            ./deploy-ecs.sh
 workflows:
   test-build-deploy:
     jobs:
@@ -68,6 +91,13 @@ workflows:
       - deploy-jar-to-github-releases:
           requires:
             - testnbuild
+#          filters:
+#            branches:
+#              only: master
+      - deploy-ecs:
+          requires:
+            - testnbuild
+            - deploy-to-docker-hub
 #          filters:
 #            branches:
 #              only: master

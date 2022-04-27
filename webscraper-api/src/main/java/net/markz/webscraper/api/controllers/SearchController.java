@@ -29,4 +29,5 @@ public class SearchController implements SearchApiDelegate {
             new GetSearchResultsResponse()
                 .data(searchService.getSearchResults(onlineShopName, searchString)));
   }
+
 }
