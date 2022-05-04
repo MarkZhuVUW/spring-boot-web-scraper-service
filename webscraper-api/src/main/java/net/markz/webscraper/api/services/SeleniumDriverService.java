@@ -30,7 +30,14 @@ public class SeleniumDriverService {
     ChromeOptions opts = new ChromeOptions();
 
     opts.addArguments("--no-sandbox"); // Bypass OS security model
-    opts.addArguments("incognito");
+//    opts.addArguments("incognito");
+    opts.addArguments("--disable-dev-shm-usage");
+    opts.addArguments("--headless");
+
+    // Make headless chrome invisible.
+    final var userAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.41 Safari/537.36";
+    opts.addArguments(String.format("user-agent=%s", userAgent));
+
     try {
       return new RemoteWebDriver(new URL(remote_url_chrome), opts);
     } catch (MalformedURLException e) {

@@ -44,11 +44,11 @@ public class TheWarehouseParser implements ISeleniumParser {
                     }
                     return items
                             .stream()
-                            .filter(Objects::nonNull)
-                            .filter(item -> item.getAttribute("data-gtm-product") != null)
                             .map(item -> {
                                 String dataGtmProduct = item.getAttribute("data-gtm-product");
-
+                                if (dataGtmProduct == null) {
+                                    return null;
+                                }
                                 Map<String, String> body;
                                 final WebElement specialImage = Utils.translateWebElementException(() ->
                                         item.findElement(By.cssSelector("img[class*='product-badge-image top left']")));
@@ -65,6 +65,8 @@ public class TheWarehouseParser implements ISeleniumParser {
                                     throw new WebscraperException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
                                 }
                             })
+                            .filter(Objects::nonNull)
+
                             .filter(body -> {
                                 final double thenPrice = Double.parseDouble(body.get("productThenPrice"));
                                 final double salePrice = Double.parseDouble(body.get("price"));
