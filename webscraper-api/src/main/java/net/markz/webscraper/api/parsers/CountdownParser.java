@@ -38,7 +38,9 @@ public class CountdownParser implements ISeleniumParser {
                     if (items == null) {
                         return null; // swallow WebDriver exceptions and assume no result found.
                     }
+
                     return items.stream()
+                            .limit(10) // Limit to only 10 items for now. We don't want to get into pagination yet.
                             .map(
                                     item ->
                                     {
