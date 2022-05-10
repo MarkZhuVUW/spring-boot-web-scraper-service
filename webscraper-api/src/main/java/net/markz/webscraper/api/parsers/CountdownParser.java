@@ -33,17 +33,18 @@ public class CountdownParser implements ISeleniumParser {
                     if (root == null) {
                         return new ArrayList<>(); // swallow WebDriver exceptions and assume no result found.
                     }
-                    var items =
-                            Utils.translateWebElementException(() -> root.findElements(By.tagName("cdx-card")));
+                    var items = root.findElements(By.tagName("cdx-card"));
 
                     if (items == null) {
-                        return new ArrayList<>(); // swallow WebDriver exceptions and assume no result found.
+                        return null; // swallow WebDriver exceptions and assume no result found.
                     }
                     return items.stream()
                             .map(
                                     item ->
                                     {
-                                        final var nameElement = item.findElement(By.tagName("h2"));
+                                        final var nameElement = Utils.translateWebElementException(
+                                                () -> item.findElement(By.tagName("h2"))
+                                        );
                                         if(nameElement == null) {
                                             return null;
                                         }

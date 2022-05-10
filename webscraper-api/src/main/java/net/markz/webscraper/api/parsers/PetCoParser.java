@@ -10,7 +10,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -33,7 +32,7 @@ public class PetCoParser implements ISeleniumParser {
 
                     if(items == null) {
                         log.debug("Looking for class name: {}, actual DOM: {}", "products-with-divider",  webDriver.getPageSource());
-                        return new ArrayList<>(); // swallow WebDriver exceptions and assume no result found.
+                        return null; // swallow WebDriver exceptions and assume no result found.
                     }
 
                     return items

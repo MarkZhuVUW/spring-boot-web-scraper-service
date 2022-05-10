@@ -15,7 +15,6 @@ import org.openqa.selenium.WebElement;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -35,12 +34,13 @@ public class TheWarehouseParser implements ISeleniumParser {
                     var root =
                             webDriver.findElement(By.cssSelector("[class='product-grid-wrapper']"));
                     if(root == null) {
-                        return new ArrayList<>(); // swallow WebDriver exceptions and assume no result found.
+                        return null; // swallow WebDriver exceptions and assume no result found.
                     }
-                    var items =  Utils.translateWebElementException(() -> root.findElements(By.cssSelector("[class='product-tile']")));
+
+                    var items =  root.findElements(By.cssSelector("[class='product-tile']"));
 
                     if(items == null) {
-                        return new ArrayList<>(); // swallow WebDriver exceptions and assume no result found.
+                        return null; // swallow WebDriver exceptions and assume no result found.
                     }
                     return items
                             .stream()

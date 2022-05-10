@@ -43,9 +43,9 @@ public class GoogleShoppingParser implements ISeleniumParser {
                     webDriver.findElement(By.className("sh-pr__product-results-grid"));
             if(root == null) {
                 log.debug("Looking for class name: {}, actual DOM: {}", "sh-pr__product-results-grid", webDriver.getPageSource());
-                return new ArrayList<>(); // swallow WebDriver exceptions and assume no result found.
+                return null; // swallow WebDriver exceptions and assume no result found.
             }
-            var items =  Utils.translateWebElementException(() -> root.findElements(By.className("sh-dgr__content")));
+            var items =  root.findElements(By.className("sh-dgr__content"));
 
             if(items == null) {
                 log.debug("Looking for class name: {}, actual DOM: {}", "sh-dgr__content", webDriver.getPageSource());
