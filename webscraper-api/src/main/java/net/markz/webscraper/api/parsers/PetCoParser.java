@@ -5,7 +5,7 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import net.markz.webscraper.api.utils.Utils;
 import net.markz.webscraper.model.OnlineShopDto;
-import net.markz.webscraper.model.OnlineShoppingItemDTO;
+import net.markz.webscraper.model.OnlineShoppingItemDto;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.springframework.stereotype.Component;
@@ -24,7 +24,7 @@ public class PetCoParser implements ISeleniumParser {
                 .split("\\n")[1];
     }
     @Override
-    public List<OnlineShoppingItemDTO> parse(@NonNull WebDriver webDriver) {
+    public List<OnlineShoppingItemDto> parse(@NonNull WebDriver webDriver) {
         return Utils.translateWebElementException(
                 () -> {
                     var items =
@@ -38,9 +38,10 @@ public class PetCoParser implements ISeleniumParser {
                     return items
                             .stream()
                             .filter(item -> item.findElement(By.className("price")).getAttribute("innerText").startsWith("Save up to "))
+                            .limit(11) // Limit to only 10 items for now. We don't want to get into pagination yet.
                             .map(item -> {
                                         final var name = item.findElement(By.className("desc")).getAttribute("innerText");
-                                        return new OnlineShoppingItemDTO()
+                                        return new OnlineShoppingItemDto()
                                                 .onlineShop(OnlineShopDto.PET_CO)
                                                 .onlineShopName(OnlineShopDto.PET_CO.name())
                                                 .name(name)
@@ -48,6 +49,7 @@ public class PetCoParser implements ISeleniumParser {
                                                 .uuid(name)
                                                 .imageUrl(item.findElement(By.tagName("a")).findElement(By.tagName("img")).getAttribute("src"))
                                                 .href(item.findElement(By.tagName("a")).getAttribute("href"))
+                                                .userId("markz") // hardcoded until I implement api gateway + cognito.
                                                 // TODO: Implement database
                                                 .isSaved(false);
                                     }

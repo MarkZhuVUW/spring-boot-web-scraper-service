@@ -36,6 +36,7 @@
         <lambda-java-events.version>3.11.0</lambda-java-events.version>
         <lambda-java-core.version>1.2.1</lambda-java-core.version>
         <log4j-version>2.17.1</log4j-version>
+        <aws.sdk.version>1.12.217</aws.sdk.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -98,23 +99,12 @@
                 <artifactId>aws-lambda-java-events</artifactId>
                 <version>${lambda-java-events.version}</version>
             </dependency>
-
             <dependency>
-                <groupId>software.amazon.awssdk</groupId>
-                <artifactId>bom</artifactId>
-                <version>${awssdk.version}</version>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-java-sdk-bom</artifactId>
+                <version>${aws.sdk.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>software.amazon.awssdk</groupId>
-                <artifactId>lambda</artifactId>
-                <version>${awssdk.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>software.amazon.awssdk</groupId>
-                <artifactId>sqs</artifactId>
-                <version>${awssdk.version}</version>
             </dependency>
             <!--  Swagger & Codegen -->
             <dependency>

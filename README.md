@@ -3,3 +3,4 @@
 <img src="https://img.shields.io/docker/pulls/zdy120939259/web-scraper-service"/>
 <img src="https://img.shields.io/docker/stars/zdy120939259/web-scraper-service.svg"/>
 # spring-boot-web-scraper-service
+java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb

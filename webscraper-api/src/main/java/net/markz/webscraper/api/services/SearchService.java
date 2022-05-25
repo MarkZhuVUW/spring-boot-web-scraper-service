@@ -3,11 +3,12 @@ package net.markz.webscraper.api.services;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import net.markz.webscraper.api.daos.ISearchDao;
+import net.markz.webscraper.api.daos.searchdao.SearchDao;
+import net.markz.webscraper.api.parsers.DtoDataParser;
 import net.markz.webscraper.api.parsers.ParserFactory;
 import net.markz.webscraper.api.utils.Utils;
 import net.markz.webscraper.model.OnlineShopDto;
-import net.markz.webscraper.model.OnlineShoppingItemDTO;
+import net.markz.webscraper.model.OnlineShoppingItemDto;
 import org.openqa.selenium.WebDriver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,11 +21,39 @@ import java.util.List;
 @Slf4j
 public class SearchService {
 
-  private final ISearchDao ISearchDao;
+  private final SearchDao searchDao;
   private final SeleniumDriverService seleniumDriverService;
   private final ParserFactory parserFactory;
 
-  public List<OnlineShoppingItemDTO> getSearchResults(
+  public void createOnlineShoppingItems(final List<OnlineShoppingItemDto> onlineShoppingItemDtos) {
+    searchDao.upsertOnlineShoppingItems(
+            onlineShoppingItemDtos.stream().map(DtoDataParser::parseDto).toList()
+    );
+  }
+
+  public List<OnlineShoppingItemDto> getOnlineShoppingItems() {
+    final var userId = "markz";
+
+    return searchDao.getOnlineShoppingItemsByUser(userId)
+            .stream()
+            .map(DtoDataParser::parseData)
+            .toList();
+  }
+
+  public void deleteOnlineShoppingItems(final List<OnlineShoppingItemDto> onlineShoppingItemDtos) {
+    searchDao.deleteOnlineShoppingItems(
+            onlineShoppingItemDtos.stream().map(DtoDataParser::parseDto).toList()
+    );
+  }
+
+  public void updateOnlineShoppingItems(final List<OnlineShoppingItemDto> onlineShoppingItemDtos) {
+    searchDao.upsertOnlineShoppingItems(
+            onlineShoppingItemDtos.stream().map(DtoDataParser::parseDto).toList()
+    );
+  }
+
+
+  public List<OnlineShoppingItemDto> scrapeSearchResults(
           @NonNull final OnlineShopDto onlineShopDto, @NonNull final String searchString) {
 
     WebDriver driver = null;
@@ -33,9 +62,9 @@ public class SearchService {
     try {
 
       driver = seleniumDriverService.lazyLoadWebDriver();
-      log.debug("Getting chrome driver with search url: {}", searchUrl);
+      log.debug("Loading search url: {}", searchUrl);
       driver.get(searchUrl.getSearchUrlWithPathParams(searchString));
-      log.debug("Got chrome driver with search url: {}", searchUrl);
+      log.debug("Loaded search url: {}", searchUrl);
 
       final var results = parserFactory
               .getSeleniumParser(onlineShopDto)
@@ -48,18 +77,8 @@ public class SearchService {
 
     } finally {
       if (driver != null) {
-        final var openWindowTabs = driver.getWindowHandles();
-        log.debug("Number of open tabs after scraping {}: {} ", searchUrl, openWindowTabs.size());
-        if(openWindowTabs.size() > 1) {
-
-          for (int i = 0; i < openWindowTabs.size() - 1; i++) {
-            driver.close(); // close most tabs but leave one to ensure browser is still open for reusing.
-          }
-        }
-        log.debug("Number of open tabs after cleaning: {} ", openWindowTabs.size());
-
-//        driver.quit();
-
+        // Clean up after scraping. Might need to re-initialize webDriver in case of browser session timeout.
+        seleniumDriverService.handleWebDriverCleanUp(searchUrl);
       }
     }
   }

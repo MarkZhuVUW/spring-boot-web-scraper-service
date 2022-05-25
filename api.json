@@ -6,7 +6,7 @@
     "version": "${version}"
   },
   "paths": {
-    "/search": {
+    "/search/items": {
       "get": {
         "tags": [
           "search"
@@ -43,6 +43,118 @@
                 }
               }
             }
+          },
+          "default": {
+            "description": "Error getting onlineShoppingItems.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "search"
+        ],
+        "description": "Create OnlineShoppingItem. ",
+        "operationId": "createOnlineShoppingItems",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSearchResultsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "created onlineShoppingItem.",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "default": {
+            "description": "Error creating onlineShoppingItem.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "search"
+        ],
+        "description": "Update OnlineShoppingItems. ",
+        "operationId": "updateOnlineShoppingItems",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSearchResultsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated onlineShoppingItem.",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "default": {
+            "description": "Error updating onlineShoppingItem.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "search"
+        ],
+        "description": "Delete OnlineShoppingItems. ",
+        "operationId": "deleteOnlineShoppingItems",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteSearchResultsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "deleted onlineShoppingItems.",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "default": {
+            "description": "Error deleting onlineShoppingItems.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -59,7 +171,7 @@
           "GOOGLE_SHOPPING"
         ]
       },
-      "OnlineShoppingItemDTO": {
+      "OnlineShoppingItemDto": {
         "type": "object",
         "properties": {
           "onlineShop": {
@@ -86,6 +198,43 @@
           "uuid": {
             "type": "string",
             "description": "Unique id of the item. (In the case of Countdown it is barcode)"
+          },
+          "userId": {
+            "type": "string",
+            "description": "Unique id of the user."
+          }
+        }
+      },
+      "UpdateSearchResultsRequest": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OnlineShoppingItemDto"
+            }
+          }
+        }
+      },
+      "DeleteSearchResultsRequest": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OnlineShoppingItemDto"
+            }
+          }
+        }
+      },
+      "CreateSearchResultsRequest": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OnlineShoppingItemDto"
+            }
           }
         }
       },
@@ -95,11 +244,20 @@
           "data": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/OnlineShoppingItemDTO"
+              "$ref": "#/components/schemas/OnlineShoppingItemDto"
             }
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
           }
         }
       }
     }
+
   }
 }

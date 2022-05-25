@@ -13,24 +13,27 @@ services:
       - 8.8.4.4
     depends_on:
       - selenium-remote-chrome-driver-service
+      - dynamodb-local
     environment:
       JAVA_OPTS: -Dlogging.level.net.markz.webscraper.api=DEBUG -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8000
-
     volumes:
       - ~/.aws/credentials:/root/.aws/credentials:ro
       - ./dynamicconfig.properties:/tmp/dynamicconfig.properties
-    networks:
-      - webscraper-selenium-service
   selenium-remote-chrome-driver-service:
-    image: selenium/standalone-chrome
+    image: selenium/standalone-chrome:latest
     privileged: true
     ports:
       - 4444:4444
     volumes:
       - /dev/shm:/dev/shm
-    networks:
-      - webscraper-selenium-service
-networks:
-  webscraper-selenium-service:
-    driver: bridge
+  dynamodb-local:
+    image: amazon/dynamodb-local:latest
+    container_name: dynamodb-local
+    hostname: dynamodb-local
+    restart: always
+    volumes:
+      -  ./data:/home/dynamodblocal/data
+    ports:
+      - 8001:8000
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath /home/dynamodblocal/data/"
 volumes: { }

@@ -19,7 +19,7 @@ public final record Utils() {
     public static <T> T translateWebElementException(ExceptionHandler<T> func) {
         try {
             return func.handle();
-        } catch (WebDriverException e) { // swallow Element not found exception.
+        } catch (WebDriverException e) { // swallow all web driver exceptions including ElementNotFoundException.
             log.error("WebdriverException thrown: {}. Swallowing it.", e.toString());
             return null; // Indicate no element found.
         }
@@ -60,6 +60,7 @@ public final record Utils() {
                 return bean.getClass();
             }
 
+            @Override
             public boolean isSingleton() {
                 return true;
             }

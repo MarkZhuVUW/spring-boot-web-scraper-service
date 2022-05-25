@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.markz.webscraper.api.constants.NetworkConstants;
 import net.markz.webscraper.api.exceptions.WebscraperException;
+import net.markz.webscraper.api.utils.Utils;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -29,11 +30,24 @@ public class SeleniumDriverService {
 
   public WebDriver lazyLoadWebDriver() {
 
-    if(driver != null) {
-      return driver;
+    if(this.driver != null) {
+      final var openWindowTabs = Utils.translateWebElementException(() -> driver.getWindowHandles());
+
+      if(openWindowTabs == null) {
+        // quit browser instance and recreate it on receiving WebDriverException.
+        this.driver = createNewWebDriver();
+      }
+      return this.driver;
     }
 
+    this.driver = createNewWebDriver();
+
+    return this.driver;
+  }
+
+  private WebDriver createNewWebDriver() {
     log.debug("Getting new chrome driver instance");
+
 
     final String remote_url_chrome = Arrays.stream(env.getActiveProfiles()).toList().contains("local") ?
             NetworkConstants.LOCAL_SELENIUM_HOST_NAME.getStr() :
@@ -50,12 +64,31 @@ public class SeleniumDriverService {
     opts.addArguments(String.format("user-agent=%s", userAgent));
 
     try {
-      this.driver = new RemoteWebDriver(new URL(remote_url_chrome), opts);
+      final var remoteDriver = new RemoteWebDriver(new URL(remote_url_chrome), opts);
+
       log.debug("Got new chrome driver instance");
 
-      return this.driver;
+      return remoteDriver;
     } catch (MalformedURLException e) {
       throw new WebscraperException(HttpStatus.INTERNAL_SERVER_ERROR, String.format("Invalid url: %s", remote_url_chrome));
+    }
+
+  }
+
+  public void handleWebDriverCleanUp(final SearchUrl searchUrl) {
+
+    final var openWindowTabs =  driver.getWindowHandles();
+
+    if(openWindowTabs.size() > 1) {
+      log.debug(
+              "Number of open tabs is {} when scraping website: {}, need to clean up redundant tabs to improve perf.",
+              searchUrl,
+              openWindowTabs.size()
+      );
+      for (int i = 0; i < openWindowTabs.size() - 1; i++) {
+        driver.close(); // close most tabs but leave one to ensure browser is still open for reusing.
+      }
+      log.debug("Number of open tabs after cleaning: {} ", openWindowTabs.size());
     }
   }
 }

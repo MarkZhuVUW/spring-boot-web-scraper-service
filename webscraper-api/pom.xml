@@ -15,7 +15,6 @@
         <java.version>17</java.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-
         <newrelic.java-agent.version>6.5.0</newrelic.java-agent.version>
     </properties>
     <packaging>jar</packaging>
@@ -148,8 +147,8 @@
         </dependency>
         <!--   AWS    -->
         <dependency>
-            <groupId>software.amazon.awssdk</groupId>
-            <artifactId>sqs</artifactId>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-dynamodb</artifactId>
         </dependency>
 
     </dependencies>
@@ -311,4 +310,5 @@
             </properties>
         </profile>
     </profiles>
+
 </project>

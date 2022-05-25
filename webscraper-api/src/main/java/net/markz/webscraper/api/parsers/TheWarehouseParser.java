@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.markz.webscraper.api.exceptions.WebscraperException;
 import net.markz.webscraper.api.utils.Utils;
 import net.markz.webscraper.model.OnlineShopDto;
-import net.markz.webscraper.model.OnlineShoppingItemDTO;
+import net.markz.webscraper.model.OnlineShoppingItemDto;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -28,7 +28,7 @@ public class TheWarehouseParser implements ISeleniumParser {
         return priceStr.replace("||", ". ");
     }
     @Override
-    public List<OnlineShoppingItemDTO> parse(@NonNull WebDriver webDriver) {
+    public List<OnlineShoppingItemDto> parse(@NonNull WebDriver webDriver) {
         return Utils.translateWebElementException(
                 () -> {
                     var root =
@@ -44,6 +44,7 @@ public class TheWarehouseParser implements ISeleniumParser {
                     }
                     return items
                             .stream()
+                            .limit(11) // Limit to only 10 items for now. We don't want to get into pagination yet.
                             .map(item -> {
                                 String dataGtmProduct = item.getAttribute("data-gtm-product");
                                 if (dataGtmProduct == null) {
@@ -74,7 +75,7 @@ public class TheWarehouseParser implements ISeleniumParser {
                                 final boolean specialImage = body.get("specialImage").equals("true");
                                 return !(thenPrice >= salePrice && specialImage);
                             })
-                            .map(body -> new OnlineShoppingItemDTO()
+                            .map(body -> new OnlineShoppingItemDto()
                                     .onlineShop(OnlineShopDto.THE_WAREHOUSE)
                                     .onlineShopName(OnlineShopDto.THE_WAREHOUSE.name())
                                     .name(body.get("name"))
@@ -82,6 +83,7 @@ public class TheWarehouseParser implements ISeleniumParser {
                                     .uuid(body.get("id"))
                                     .imageUrl(body.get("titleImage"))
                                     .href(body.get("href"))
+                                    .userId("markz") // hardcoded until I implement api gateway + cognito.
                                     // TODO: Implement database
                                     .isSaved(false)
                             )

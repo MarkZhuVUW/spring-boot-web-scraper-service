@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.markz.webscraper.api.utils.Utils;
 import net.markz.webscraper.model.OnlineShopDto;
-import net.markz.webscraper.model.OnlineShoppingItemDTO;
+import net.markz.webscraper.model.OnlineShoppingItemDto;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.springframework.stereotype.Component;
@@ -25,7 +25,7 @@ public class CountdownParser implements ISeleniumParser {
     }
 
     @Override
-    public List<OnlineShoppingItemDTO> parse(final WebDriver webDriver) {
+    public List<OnlineShoppingItemDto> parse(final WebDriver webDriver) {
         return Utils.translateWebElementException(
                 () -> {
                     log.info("parsing countdown response.");
@@ -40,19 +40,20 @@ public class CountdownParser implements ISeleniumParser {
                     }
 
                     return items.stream()
-                            .limit(10) // Limit to only 10 items for now. We don't want to get into pagination yet.
+                            // Filter out dirty data.
+                            .filter(item ->
+                                    Utils.translateWebElementException(() -> item.findElement(By.tagName("h2"))) != null)
+                            .limit(11) // Limit to only 10 items for now. We don't want to get into pagination yet.
                             .map(
                                     item ->
                                     {
-                                        final var nameElement = Utils.translateWebElementException(
-                                                () -> item.findElement(By.tagName("h2"))
-                                        );
+                                        final var nameElement = item.findElement(By.tagName("h2"));
                                         if(nameElement == null) {
                                             return null;
                                         }
                                         final var priceElement = item.findElement(By.tagName("h3"));
 
-                                        return new OnlineShoppingItemDTO()
+                                        return new OnlineShoppingItemDto()
                                                 .onlineShop(OnlineShopDto.COUNTDOWN)
                                                 .onlineShopName(OnlineShopDto.COUNTDOWN.name())
                                                 .name(nameElement.getText())
@@ -60,6 +61,7 @@ public class CountdownParser implements ISeleniumParser {
                                                 .uuid(parseId(priceElement.getAttribute("id")))
                                                 .imageUrl(item.findElement(By.tagName("img")).getAttribute("src"))
                                                 .href(item.findElement(By.tagName("a")).getAttribute("href"))
+                                                .userId("markz") // hardcoded until I implement api gateway + cognito.
                                                 // TODO: Implement database
                                                 .isSaved(false);
                                     }
