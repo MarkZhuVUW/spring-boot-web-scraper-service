@@ -47,7 +47,7 @@ public class DynamoDBConfiguration {
     @Value("${amazon.secretsmanager.endpoint}")
     private String  endpoint;
 
-    @Value("${amazon.dynamodb.region}")
+    @Value("${amazon.secretsmanager.region}")
     private String  region;
 
     @Autowired
@@ -58,18 +58,13 @@ public class DynamoDBConfiguration {
     public DynamoDBMapper dynamoDBMapper() {
 
         final boolean isLocal = Arrays.stream(env.getActiveProfiles()).toList().contains("local");
-
-        log.debug("Creating dynamodb client");
-        final AmazonDynamoDB client = AmazonDynamoDBClientBuilder.defaultClient();
-        log.debug("Created dynamodb client");
-        final var dynamoDBMapper = new DynamoDBMapper(client, DynamoDBMapperConfig.DEFAULT);
-
         if(isLocal) {
 
             final AmazonDynamoDB localClient = AmazonDynamoDBClientBuilder.standard()
                     .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials("foo", "bar")))
                     .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpoint, region))
                     .build();
+            final var dynamoDBMapper = new DynamoDBMapper(localClient, DynamoDBMapperConfig.DEFAULT);
 
             // Create the table if we are in local environment.
             // In prod the table is provisioned through AWS CDK: https://github.com/MarkZhuVUW/aws-cdk-all/tree/master/src/main/java/net/markz/awscdkstack/services/webscraperservice
@@ -83,11 +78,15 @@ public class DynamoDBConfiguration {
                 createTable(dynamoDBMapper, localClient);
             }
             log.debug("Created table");
+            return dynamoDBMapper;
 
         }
 
+        log.debug("Creating dynamodb client");
+        final AmazonDynamoDB client = AmazonDynamoDBClientBuilder.defaultClient();
+        log.debug("Created dynamodb client");
 
-        return dynamoDBMapper;
+        return new DynamoDBMapper(client, DynamoDBMapperConfig.DEFAULT);
     }
 
 //    private Map<String, String> getCredentialsFromSSM() {

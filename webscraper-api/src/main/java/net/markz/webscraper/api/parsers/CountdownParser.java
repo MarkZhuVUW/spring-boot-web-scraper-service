@@ -31,11 +31,13 @@ public class CountdownParser implements ISeleniumParser {
                     log.info("parsing countdown response.");
                     var root =  webDriver.findElement(By.tagName("product-grid"));
                     if (root == null) {
+                        log.info("Cannot find tag name: product-grid");
                         return new ArrayList<>(); // swallow WebDriver exceptions and assume no result found.
                     }
                     var items = root.findElements(By.tagName("cdx-card"));
 
                     if (items == null) {
+                        log.info("Cannot find tag name: cdx-card");
                         return null; // swallow WebDriver exceptions and assume no result found.
                     }
 

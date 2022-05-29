@@ -6,13 +6,13 @@
     "version": "${version}"
   },
   "paths": {
-    "/search/items": {
+    "/scrape/items": {
       "get": {
         "tags": [
           "search"
         ],
-        "description": "Get search results for of online shopping website",
-        "operationId": "getSearchResults",
+        "description": "Scrape an online shopping website",
+        "operationId": "scrapeSearchResults",
         "parameters": [
           {
             "name": "onlineShopName",
@@ -33,6 +33,38 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSearchResultsResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error scraping onlineShoppingItems.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/search/items": {
+      "get": {
+        "tags": [
+          "search"
+        ],
+        "description": "Get search results for of online shopping website",
+        "operationId": "getSearchResults",
+        "parameters": [],
         "responses": {
           "200": {
             "description": "200",

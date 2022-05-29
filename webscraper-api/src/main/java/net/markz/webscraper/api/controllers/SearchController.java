@@ -22,10 +22,20 @@ public class SearchController implements SearchApiDelegate {
 
   private final SearchService searchService;
 
+
+    @Override
+    public ResponseEntity<GetSearchResultsResponse> scrapeSearchResults(
+            @NonNull final OnlineShopDto onlineShopName,
+            @NonNull final String searchString) {
+        return Utils.translateException(
+                () ->
+                        new GetSearchResultsResponse()
+                                .data(searchService.scrapeSearchResults(onlineShopName, searchString))
+        );
+    }
+
   @Override
-  public ResponseEntity<GetSearchResultsResponse> getSearchResults(
-          @NonNull final OnlineShopDto onlineShopName,
-          @NonNull final String searchString) {
+  public ResponseEntity<GetSearchResultsResponse> getSearchResults() {
     return Utils.translateException(
             () ->
                     new GetSearchResultsResponse()

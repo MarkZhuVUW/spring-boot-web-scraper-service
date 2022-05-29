@@ -63,8 +63,9 @@ public class SearchService {
 
       driver = seleniumDriverService.lazyLoadWebDriver();
       log.debug("Loading search url: {}", searchUrl);
-      driver.get(searchUrl.getSearchUrlWithPathParams(searchString));
-      log.debug("Loaded search url: {}", searchUrl);
+      final var parsedSearchUrl = searchUrl.getSearchUrlWithPathParams(searchString);
+      driver.get(parsedSearchUrl);
+      log.debug("Parsed search url: {}", parsedSearchUrl);
 
       final var results = parserFactory
               .getSeleniumParser(onlineShopDto)
