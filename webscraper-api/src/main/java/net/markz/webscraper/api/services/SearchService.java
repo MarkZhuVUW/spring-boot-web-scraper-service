@@ -67,9 +67,11 @@ public class SearchService {
       driver.get(parsedSearchUrl);
       log.debug("Parsed search url: {}", parsedSearchUrl);
 
+      log.debug("Parsing search result");
       final var results = parserFactory
               .getSeleniumParser(onlineShopDto)
               .parse(driver);
+      log.debug("Parsed search result={}", results);
 
       if(results == null) {
         return new ArrayList<>();

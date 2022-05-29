@@ -28,13 +28,16 @@ public class CountdownParser implements ISeleniumParser {
     public List<OnlineShoppingItemDto> parse(final WebDriver webDriver) {
         return Utils.translateWebElementException(
                 () -> {
-                    log.info("parsing countdown response.");
-                    var root =  webDriver.findElement(By.tagName("product-grid"));
+                    var root =  Utils.translateWebElementException(
+                            () -> webDriver.findElement(By.tagName("product-grid"))
+                    );
                     if (root == null) {
                         log.info("Cannot find tag name: product-grid");
                         return new ArrayList<>(); // swallow WebDriver exceptions and assume no result found.
                     }
-                    var items = root.findElements(By.tagName("cdx-card"));
+                    var items = Utils.translateWebElementException(
+                            () -> root.findElements(By.tagName("cdx-card"))
+                    );
 
                     if (items == null) {
                         log.info("Cannot find tag name: cdx-card");
@@ -49,11 +52,15 @@ public class CountdownParser implements ISeleniumParser {
                             .map(
                                     item ->
                                     {
-                                        final var nameElement = item.findElement(By.tagName("h2"));
+                                        final var nameElement = Utils.translateWebElementException(
+                                                () -> item.findElement(By.tagName("h2"))
+                                        );
                                         if(nameElement == null) {
                                             return null;
                                         }
-                                        final var priceElement = item.findElement(By.tagName("h3"));
+                                        final var priceElement = Utils.translateWebElementException(
+                                                () -> item.findElement(By.tagName("h3"))
+                                        );
 
                                         return new OnlineShoppingItemDto()
                                                 .onlineShop(OnlineShopDto.COUNTDOWN)
