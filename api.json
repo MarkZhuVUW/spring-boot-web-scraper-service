@@ -158,6 +158,50 @@
           }
         }
       }
+    },
+    "/search/items/{id}": {
+      "patch": {
+        "description": "Update an item",
+        "operationId": "updateOnlineShoppingItem",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Item uuid",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSearchResultRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated onlineShoppingItem.",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "default": {
+            "description": "Error creating onlineShoppingItem.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -210,6 +254,17 @@
         "properties": {
           "data": {
             "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OnlineShoppingItemDto"
+            }
+          }
+        }
+      },
+      "UpdateSearchResultRequest": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
             "items": {
               "$ref": "#/components/schemas/OnlineShoppingItemDto"
             }

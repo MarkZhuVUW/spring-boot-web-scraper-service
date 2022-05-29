@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 import net.markz.webscraper.api.daos.converters.LocalDateConverter;
 import net.markz.webscraper.model.OnlineShopDto;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @AllArgsConstructor
 @Builder
@@ -55,23 +55,23 @@ public class OnlineShoppingItem {
     @DynamoDBAttribute(attributeName = "lastModifiedDate")
     @DynamoDBTypeConverted(converter = LocalDateConverter.class)
     @DynamoDBTyped(DynamoDBMapperFieldModel.DynamoDBAttributeType.S)
-    private Date lastModifiedDate;
+    private LocalDate lastModifiedDate;
 
     // Use this attribute to let dynamo delete expired records.
     @DynamoDBAttribute(attributeName = "ttl")
     private long ttl;
 
-    public Date getLastModifiedDate() {
+    public LocalDate getLastModifiedDate() {
         return this.lastModifiedDate;
     }
 
-    public void setLastModifiedDate(final Date lastModifiedDate) {
+    public void setLastModifiedDate(final LocalDate lastModifiedDate) {
         this.lastModifiedDate = lastModifiedDate;
     }
 
     @DynamoDBHashKey(attributeName = "PK")
     public String getPK() {
-        return String.format("ITEM#%s%s%s", this.userId, this.onlineShop, this.uuid);
+        return String.format("ITEM#%s", this.userId);
     }
 
     public void setPK(String pk) {

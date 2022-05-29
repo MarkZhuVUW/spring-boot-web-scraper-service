@@ -40,7 +40,11 @@ management:
       graphite:
         enabled: false
 amazon:
-  region: 'ap-southeast-2'
-  dynamodb:
-    endpoint:
-      url: http://dynamodb-local:8000/
+  secretsmanager:
+    secretName: dynamodb-local
+#    endpoint: secretsmanager.ap-southeast-2.amazonaws.com
+    endpoint: http://dynamodb-local:8000/
+
+    region: ap-southeast-2
+
+

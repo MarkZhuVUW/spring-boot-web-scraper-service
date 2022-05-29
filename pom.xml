@@ -86,7 +86,13 @@
                 <scope>test</scope>
             </dependency>
 
-            <!--            AWS      -->
+            <!--            AWS              -->
+            <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-secretsmanager -->
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-java-sdk-secretsmanager</artifactId>
+                <version>1.12.230</version>
+            </dependency>
             <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-lambda-java-core -->
             <dependency>
                 <groupId>com.amazonaws</groupId>

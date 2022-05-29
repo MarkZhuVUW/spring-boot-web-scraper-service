@@ -35,3 +35,9 @@ management:
       exposure:
         include: '*'
       base-path: '/status'
+
+amazon:
+  secretsmanager:
+    secretName: dynamodb-local
+    endpoint: secretsmanager.ap-southeast-2.amazonaws.com
+    region: ap-southeast-2

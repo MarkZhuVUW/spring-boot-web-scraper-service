@@ -16,6 +16,8 @@
  */
 package net.markz.webscraper.api.configs;
 
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
@@ -39,11 +41,14 @@ import java.util.Arrays;
 @Slf4j
 public class DynamoDBConfiguration {
 
-    @Value("${amazon.region}")
-    private String region;
+    @Value("${amazon.secretsmanager.secretName}")
+    private String  secretName;
 
-    @Value("${amazon.dynamodb.endpoint.url}")
-    private String dynamoDBEndpoint;
+    @Value("${amazon.secretsmanager.endpoint}")
+    private String  endpoint;
+
+    @Value("${amazon.dynamodb.region}")
+    private String  region;
 
     @Autowired
     private Environment env;
@@ -55,25 +60,27 @@ public class DynamoDBConfiguration {
         final boolean isLocal = Arrays.stream(env.getActiveProfiles()).toList().contains("local");
 
         log.debug("Creating dynamodb client");
-
-        final AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard()
-//                .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials("foo", "bar")))
-                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(dynamoDBEndpoint, region))
-                .build();
+        final AmazonDynamoDB client = AmazonDynamoDBClientBuilder.defaultClient();
         log.debug("Created dynamodb client");
         final var dynamoDBMapper = new DynamoDBMapper(client, DynamoDBMapperConfig.DEFAULT);
 
         if(isLocal) {
+
+            final AmazonDynamoDB localClient = AmazonDynamoDBClientBuilder.standard()
+                    .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials("foo", "bar")))
+                    .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpoint, region))
+                    .build();
+
             // Create the table if we are in local environment.
             // In prod the table is provisioned through AWS CDK: https://github.com/MarkZhuVUW/aws-cdk-all/tree/master/src/main/java/net/markz/awscdkstack/services/webscraperservice
 
             log.debug("Creating table");
             try {
-                createTable(dynamoDBMapper, client);
+                createTable(dynamoDBMapper, localClient);
 
             } catch(ResourceInUseException e) {
-                client.deleteTable(new DeleteTableRequest(Constants.DYNAMO_TABLE_NAME_ONLINESHOPPINGITEMS.getStr()));
-                createTable(dynamoDBMapper, client);
+                localClient.deleteTable(new DeleteTableRequest(Constants.DYNAMO_TABLE_NAME_ONLINESHOPPINGITEMS.getStr()));
+                createTable(dynamoDBMapper, localClient);
             }
             log.debug("Created table");
 
@@ -82,6 +89,67 @@ public class DynamoDBConfiguration {
 
         return dynamoDBMapper;
     }
+
+//    private Map<String, String> getCredentialsFromSSM() {
+//        final var  config  =  new  AwsClientBuilder.EndpointConfiguration(endpoint, region);
+//        final var clientBuilder  =  AWSSecretsManagerClientBuilder.standard();
+//        clientBuilder.setEndpointConfiguration(config);
+//        final var client  =  clientBuilder.build();
+//
+//        final var objectMapper  =  new ObjectMapper();
+//
+//        JsonNode secretsJson  =  null;
+//
+//        ByteBuffer binarySecretData;
+//
+//        final var getSecretValueRequest  =  new GetSecretValueRequest().withSecretId(secretName);
+//
+//        GetSecretValueResult getSecretValueResponse  =  null;
+//
+//        try  {
+//            getSecretValueResponse  =  client.getSecretValue(getSecretValueRequest);
+//        }
+//
+//        catch  (ResourceNotFoundException e)  {
+//            log.error("The requested secret "  +  secretName  +  " was not found");
+//        }
+//
+//        catch  (InvalidRequestException e)  {
+//            log.error("The request was invalid due to: "  +  e.getMessage());
+//        }
+//
+//        catch  (InvalidParameterException e)  {
+//            log.error("The request had invalid params: "  +  e.getMessage());
+//        }
+//        if  (getSecretValueResponse  ==  null)  {
+//            return  null;
+//        }  // Decrypted secret using the associated KMS key // Depending on whether the secret was a string or binary, one of these fields will be populated
+//
+//
+//        String secret = getSecretValueResponse.getSecretString();
+//
+//        if (secret != null) {
+//            try {
+//                secretsJson  =  objectMapper.readTree(secret);
+//            }
+//
+//            catch  (IOException e)  {
+//                log.error("Exception while retrieving secret values: "  +  e.getMessage());
+//            }
+//        }
+//
+//        else  {
+//            log.error("The Secret String returned is null");
+//
+//            return null;
+//
+//        }
+//        String  host  =  secretsJson.get("host").textValue();
+//        String  port  =  secretsJson.get("port").textValue();
+//        String  dbname  =  secretsJson.get("dbname").textValue();
+//        String  username  =  secretsJson.get("username").textValue();
+//        String  password  =  secretsJson.get("password").textValue();
+//    }
 
     private void createTable(final DynamoDBMapper mapper, final AmazonDynamoDB client) {
 
