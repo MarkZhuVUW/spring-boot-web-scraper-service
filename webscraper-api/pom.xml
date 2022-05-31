@@ -148,6 +148,10 @@
         <!--   AWS    -->
         <dependency>
             <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-sqs</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
             <artifactId>aws-lambda-java-core</artifactId>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-lambda-java-events -->

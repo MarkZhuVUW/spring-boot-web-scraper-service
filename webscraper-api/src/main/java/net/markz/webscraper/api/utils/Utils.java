@@ -10,7 +10,10 @@ import org.openqa.selenium.WebDriverException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.http.ResponseEntity;
 
-
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.Calendar;
+import java.util.TimeZone;
 
 
 @Slf4j
@@ -65,6 +68,19 @@ public final record Utils() {
                 return true;
             }
         };
+    }
+
+    public static OffsetDateTime toUtcDateTime(Calendar cal) {
+        return cal.getTime().toInstant().atOffset(ZoneOffset.UTC);
+    }
+
+    public static Calendar toUtcCalendar(String dateTime) {
+        final var odt = OffsetDateTime.parse(dateTime);
+        final var calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        calendar.setTimeInMillis(odt.toInstant().toEpochMilli());
+
+
+        return calendar;
     }
 }
 

@@ -12,16 +12,18 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.markz.webscraper.api.daos.converters.LocalDateConverter;
+import lombok.ToString;
+import net.markz.webscraper.api.daos.converters.OffsetDateTimeConverter;
 import net.markz.webscraper.model.OnlineShopDto;
 
-import java.time.LocalDate;
+import java.util.Calendar;
 
 @AllArgsConstructor
 @Builder
 @Data
 @DynamoDBTable(tableName = "OnlineShoppingItems")
 @NoArgsConstructor
+@ToString
 public class OnlineShoppingItem {
 
     @DynamoDBAttribute(attributeName = "onlineShop")
@@ -53,38 +55,38 @@ public class OnlineShoppingItem {
     private String userId;
 
     @DynamoDBAttribute(attributeName = "lastModifiedDate")
-    @DynamoDBTypeConverted(converter = LocalDateConverter.class)
+    @DynamoDBTypeConverted(converter = OffsetDateTimeConverter.class)
     @DynamoDBTyped(DynamoDBMapperFieldModel.DynamoDBAttributeType.S)
-    private LocalDate lastModifiedDate;
+    private Calendar lastModifiedDate;
 
     // Use this attribute to let dynamo delete expired records.
     @DynamoDBAttribute(attributeName = "ttl")
     private long ttl;
 
-    public LocalDate getLastModifiedDate() {
+    public Calendar getLastModifiedDate() {
         return this.lastModifiedDate;
     }
 
-    public void setLastModifiedDate(final LocalDate lastModifiedDate) {
+    public void setLastModifiedDate(final Calendar lastModifiedDate) {
         this.lastModifiedDate = lastModifiedDate;
     }
 
     @DynamoDBHashKey(attributeName = "PK")
     public String getPK() {
-        return String.format("ITEM#%s", this.userId);
+        return String.format("USERID#%s", this.userId);
     }
 
     public void setPK(String pk) {
-        // intentionally left blank: PK is set by setting liftNumber attribute
+        // intentionally left blank
     }
 
     @DynamoDBRangeKey(attributeName = "SK")
     public String getSK() {
-        return "DATE#" + this.lastModifiedDate;
+        return String.format("ITEM%s#%s", this.onlineShopName, this.name);
     }
 
     public void setSK(String sk) {
-        // intentionally left blank: SK is set by setting the date attribute
+        // intentionally left blank
     }
 
 //    @DynamoDBIndexHashKey(attributeName = "GSI_1_PK", globalSecondaryIndexName = "GSI_1")
@@ -104,4 +106,5 @@ public class OnlineShoppingItem {
 //    public void setGSI1SK(String gsi1Sk) {
 //        // intentionally left blank: SK is set by setting the totalUniqueLiftRiders attribute
 //    }
+
 }

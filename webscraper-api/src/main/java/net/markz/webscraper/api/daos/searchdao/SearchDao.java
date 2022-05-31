@@ -9,8 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
@@ -23,7 +23,7 @@ public class SearchDao {
 
     public void upsertOnlineShoppingItems(final List<OnlineShoppingItem> onlineShoppingItems) {
 
-        final var now = LocalDate.now();
+    final var now = Calendar.getInstance();
 
         // Set last modified date.
         onlineShoppingItems.forEach(item -> item.setLastModifiedDate(now));
@@ -37,14 +37,12 @@ public class SearchDao {
         final var result = dynamoDBMapper.query(
                 OnlineShoppingItem.class,
                 new DynamoDBQueryExpression<OnlineShoppingItem>()
-                        // reads from GSI can't be consistent
                         .withConsistentRead(false)
                         .withExpressionAttributeValues(
                                 Map.of(
                                         ":val1",
-                                        new AttributeValue().withS(String.format("ITEM#%s", userId))
+                                        new AttributeValue().withS(String.format("USERID#%s", userId))
                                 ))
-//                        .withIndexName("GSI_1")
                         .withKeyConditionExpression("PK = :val1")
         );
 
@@ -54,7 +52,17 @@ public class SearchDao {
         return result;
     }
 
+    public OnlineShoppingItem getOnlineShoppingItemByPrimaryKey(final OnlineShoppingItem onlineShoppingItem) {
+        return dynamoDBMapper.load(
+                OnlineShoppingItem.class,
+                onlineShoppingItem.getPK(),
+                onlineShoppingItem.getSK(),
+                DynamoDBMapperConfig.ConsistentReads.EVENTUAL.config()
+        );
+    }
+
     public void deleteOnlineShoppingItems(final List<OnlineShoppingItem> onlineShoppingItems) {
         dynamoDBMapper.batchDelete(onlineShoppingItems);
     }
+
 }

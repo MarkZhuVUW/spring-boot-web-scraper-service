@@ -46,5 +46,11 @@ amazon:
     endpoint: http://dynamodb-local:8000/
 
     region: ap-southeast-2
+  sqs:
+    queue:
+      url: bla
+    dlq:
+      url: bla
+
 
 

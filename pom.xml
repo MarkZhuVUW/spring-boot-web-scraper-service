@@ -9,6 +9,9 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>net.markz</groupId>
+    <modules>
+        <module>webscraper-client</module>
+    </modules>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>webscraper</artifactId>
     <version>0.0.1-SNAPSHOT</version>
@@ -84,11 +87,25 @@
             </dependency>
 
             <!--            AWS              -->
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-java-sdk-bom</artifactId>
+                <version>${aws.sdk.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-sqs -->
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-java-sdk-sqs</artifactId>
+                <version>${aws.sdk.version}</version>
+            </dependency>
+
             <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-secretsmanager -->
             <dependency>
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-java-sdk-secretsmanager</artifactId>
-                <version>1.12.230</version>
+                <version>${aws.sdk.version}</version>
             </dependency>
             <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-lambda-java-core -->
             <dependency>
@@ -101,13 +118,6 @@
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-lambda-java-events</artifactId>
                 <version>${lambda-java-events.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.amazonaws</groupId>
-                <artifactId>aws-java-sdk-bom</artifactId>
-                <version>${aws.sdk.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
             </dependency>
             <!--  Swagger & Codegen -->
             <dependency>
