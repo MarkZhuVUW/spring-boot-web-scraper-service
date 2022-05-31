@@ -4,72 +4,105 @@ import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import net.markz.webscraper.api.SearchApiDelegate;
+import net.markz.webscraper.api.parsers.DtoDataParser;
 import net.markz.webscraper.api.services.SearchService;
 import net.markz.webscraper.api.utils.Utils;
-import net.markz.webscraper.model.CreateSearchResultsRequest;
-import net.markz.webscraper.model.DeleteSearchResultsRequest;
-import net.markz.webscraper.model.GetSearchResultsResponse;
+import net.markz.webscraper.model.CreateOnlineShoppingItemsRequest;
+import net.markz.webscraper.model.DeleteOnlineShoppingItemsRequest;
+import net.markz.webscraper.model.GetOnlineShoppingItemResponse;
+import net.markz.webscraper.model.GetOnlineShoppingItemsResponse;
 import net.markz.webscraper.model.OnlineShopDto;
-import net.markz.webscraper.model.UpdateSearchResultsRequest;
+import net.markz.webscraper.model.OnlineShoppingItemDto;
+import net.markz.webscraper.model.UpdateOnlineShoppingItemRequest;
+import net.markz.webscraper.model.UpdateOnlineShoppingItemsRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+
+import java.util.List;
 
 @Controller
 @Slf4j
 @AllArgsConstructor(onConstructor = @__(@Autowired))
 public class SearchController implements SearchApiDelegate {
 
-  private final SearchService searchService;
+    private final SearchService searchService;
 
 
     @Override
-    public ResponseEntity<GetSearchResultsResponse> scrapeSearchResults(
+    public ResponseEntity<GetOnlineShoppingItemsResponse> scrapeSearchResults(
             @NonNull final OnlineShopDto onlineShopName,
             @NonNull final String searchString) {
         return Utils.translateException(
                 () ->
-                        new GetSearchResultsResponse()
+                        new GetOnlineShoppingItemsResponse()
                                 .data(searchService.scrapeSearchResults(onlineShopName, searchString))
         );
     }
 
-  @Override
-  public ResponseEntity<GetSearchResultsResponse> getSearchResults() {
-    return Utils.translateException(
-            () ->
-                    new GetSearchResultsResponse()
-                            .data(searchService.getOnlineShoppingItems())
-    );
-  }
+    @Override
+    public ResponseEntity<GetOnlineShoppingItemsResponse> getOnlineShoppingItems() {
+        return Utils.translateException(
+                () ->
+                        new GetOnlineShoppingItemsResponse()
+                                .data(searchService.getOnlineShoppingItems())
+        );
+    }
 
-  @Override
-  public ResponseEntity<Void> createOnlineShoppingItems(
-          final CreateSearchResultsRequest createSearchResultsRequest) {
-    return Utils.translateException(() -> {
-              searchService.createOnlineShoppingItems(createSearchResultsRequest.getData());
-              return null;
-            });
-  }
+    @Override
+    public ResponseEntity<Void> createOnlineShoppingItems(
+            final CreateOnlineShoppingItemsRequest createOnlineShoppingItemsRequest) {
+        return Utils.translateException(() -> {
+            searchService.createOnlineShoppingItems(createOnlineShoppingItemsRequest.getData());
+            return null;
+        });
+    }
 
     @Override
     public ResponseEntity<Void> updateOnlineShoppingItems(
-            final UpdateSearchResultsRequest updateSearchResultsRequest) {
+            final UpdateOnlineShoppingItemsRequest updateOnlineShoppingItemsRequest) {
         return Utils.translateException(() -> {
-            searchService.updateOnlineShoppingItems(updateSearchResultsRequest.getData());
+            searchService.updateOnlineShoppingItems(updateOnlineShoppingItemsRequest.getData());
             return null;
         });
     }
 
     @Override
     public ResponseEntity<Void> deleteOnlineShoppingItems(
-            final DeleteSearchResultsRequest deleteSearchResultsRequest) {
+            final DeleteOnlineShoppingItemsRequest deleteOnlineShoppingItemsRequest) {
         return Utils.translateException(() -> {
-            searchService.deleteOnlineShoppingItems(deleteSearchResultsRequest.getData());
+            searchService.deleteOnlineShoppingItems(deleteOnlineShoppingItemsRequest.getData());
             return null;
         });
     }
 
 
+    @Override
+    public ResponseEntity<Void> updateOnlineShoppingItem(
+            final String shopName,
+            final String name,
+            final UpdateOnlineShoppingItemRequest updateOnlineShoppingItemRequest
+    ) {
+    return Utils.translateException(
+        () -> {
+          searchService.updateOnlineShoppingItems(List.of(updateOnlineShoppingItemRequest.getData()));
+          return null;
+        });
+    }
 
+    @Override
+    public ResponseEntity<GetOnlineShoppingItemResponse> getOnlineShoppingItem(
+            final String shopName,
+            final String name
+    ) {
+        return Utils.translateException(
+                () ->
+                        new GetOnlineShoppingItemResponse()
+                                .data(searchService.getOnlineShoppingItem(DtoDataParser.parseDto(
+                                        new OnlineShoppingItemDto()
+                                                .onlineShopName(shopName)
+                                                .name(name))
+                                ))
+        );
+    }
 }

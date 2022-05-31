@@ -40,12 +40,12 @@ public class SearchService {
     );
   }
 
-  public OnlineShoppingItem getOnlineShoppingItem(final OnlineShoppingItem onlineShoppingItem) {
-    return searchDao.getOnlineShoppingItemByPrimaryKey(onlineShoppingItem);
+  public OnlineShoppingItemDto getOnlineShoppingItem(final OnlineShoppingItem onlineShoppingItem) {
+    return DtoDataParser.parseData(searchDao.getOnlineShoppingItemByPrimaryKey(onlineShoppingItem));
   }
 
   public boolean hasDuplicateItem(final List<OnlineShoppingItem> onlineShoppingItems) {
-    final var duplicateItems = onlineShoppingItems.stream().filter(item -> getOnlineShoppingItem(item) != null).toList();
+    final var duplicateItems = onlineShoppingItems.stream().filter(item ->  (item) != null).toList();
     if(duplicateItems.isEmpty()) {
       return false;
     }
@@ -73,7 +73,6 @@ public class SearchService {
             onlineShoppingItemDtos.stream().map(DtoDataParser::parseDto).toList()
     );
   }
-
 
   public List<OnlineShoppingItemDto> scrapeSearchResults(
           @NonNull final OnlineShopDto onlineShopDto, @NonNull final String searchString) {

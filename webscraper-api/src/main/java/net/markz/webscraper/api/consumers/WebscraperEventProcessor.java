@@ -4,12 +4,14 @@ import com.amazonaws.services.lambda.runtime.events.SQSEvent;
 import com.amazonaws.services.sqs.AmazonSQS;
 import lombok.extern.slf4j.Slf4j;
 import net.markz.webscraper.api.daos.searchdao.OnlineShoppingItem;
+import net.markz.webscraper.api.parsers.DtoDataParser;
 import net.markz.webscraper.api.services.SearchService;
+import net.markz.webscraper.api.sqs.Message;
 import net.markz.webscraper.api.utils.Utils;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.ExecutorService;
@@ -24,25 +26,24 @@ public class WebscraperEventProcessor extends AbstractEventProcessor <OnlineShop
     @Autowired
     private final SearchService searchService;
 
-    @Value("${amazon.sqs.queue.url}")
-    private final String sqsQueueUrl;
-
     @Autowired
     private final AmazonSQS amazonSQS;
 
     @Autowired
+    private final Environment env;
+
+    @Autowired
     public WebscraperEventProcessor(
             final WebscraperEventErrorHandler errorHandler,
-            final String sqsQueueUrl,
             final AmazonSQS amazonSQS,
-            final SearchService searchService
+            final SearchService searchService,
+            final Environment env
             ) {
 
-
-        super(buildExecutorService(), errorHandler, sqsQueueUrl, amazonSQS);
+        super(buildExecutorService(), errorHandler, env.getProperty("amazon.sqs.queue.url"), amazonSQS);
         this.amazonSQS = amazonSQS;
-        this.sqsQueueUrl = sqsQueueUrl;
         this.searchService = searchService;
+        this.env = env;
     }
 
     @Override
@@ -64,7 +65,11 @@ public class WebscraperEventProcessor extends AbstractEventProcessor <OnlineShop
     public boolean shouldIgnoreMessage(final Message<OnlineShoppingItem> message) {
 
         final var lastModified = Utils.toUtcDateTime(message.getLastModified());
-        final var currentLastModified = Utils.toUtcDateTime(searchService.getOnlineShoppingItem(message.getData()).getLastModifiedDate());
+        final var currentLastModified = Utils.toUtcDateTime(
+                DtoDataParser
+                        .parseDto(searchService.getOnlineShoppingItem(message.getData()))
+                        .getLastModifiedDate()
+        );
 
         return lastModified.isBefore(currentLastModified);
     }

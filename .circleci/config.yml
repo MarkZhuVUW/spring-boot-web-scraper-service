@@ -18,13 +18,16 @@ jobs:
             - ~/.m2
           key: v1-dependencies-{{ checksum "pom.xml" }}
       - run:
-          name: Copy relevant files to root folder
+          name: Copy  files to root folder
           command: |
             cp ./webscraper-api/target/*-exec.jar ./api.jar
+            cp ./webscraper-client/target/*-exec.jar ./client.jar
+
       - persist_to_workspace:
           root: ./
           paths:
             - api.jar
+            - client.jar
 
   deploy-to-docker-hub:
     machine:

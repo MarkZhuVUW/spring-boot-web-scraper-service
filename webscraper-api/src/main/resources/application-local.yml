@@ -49,8 +49,10 @@ amazon:
   sqs:
     queue:
       url: bla
+      name: webscraper-sqs-queue
     dlq:
       url: bla
+      name: webscraper-sqs-dlq
 
 
 

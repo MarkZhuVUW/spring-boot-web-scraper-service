@@ -5,6 +5,7 @@ import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.model.DeleteMessageRequest;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
+import net.markz.webscraper.api.sqs.Message;
 import org.slf4j.Logger;
 
 import javax.annotation.PreDestroy;

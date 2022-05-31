@@ -39,7 +39,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetSearchResultsResponse"
+                  "$ref": "#/components/schemas/GetOnlineShoppingItemsResponse"
                 }
               }
             }
@@ -62,8 +62,8 @@
         "tags": [
           "search"
         ],
-        "description": "Get search results for of online shopping website",
-        "operationId": "getSearchResults",
+        "description": "Get online shopping items for of online shopping website",
+        "operationId": "getOnlineShoppingItems",
         "parameters": [],
         "responses": {
           "200": {
@@ -71,7 +71,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetSearchResultsResponse"
+                  "$ref": "#/components/schemas/GetOnlineShoppingItemsResponse"
                 }
               }
             }
@@ -98,7 +98,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateSearchResultsRequest"
+                "$ref": "#/components/schemas/CreateOnlineShoppingItemsRequest"
               }
             }
           }
@@ -132,7 +132,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateSearchResultsRequest"
+                "$ref": "#/components/schemas/UpdateOnlineShoppingItemsRequest"
               }
             }
           }
@@ -166,7 +166,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DeleteSearchResultsRequest"
+                "$ref": "#/components/schemas/DeleteOnlineShoppingItemsRequest"
               }
             }
           }
@@ -191,16 +191,77 @@
         }
       }
     },
-    "/search/items/{id}": {
+    "/search/items/{shopName}/{name}": {
+      "get": {
+        "tags": [
+          "search"
+        ],
+        "description": "Get an item by shop name and item name",
+        "operationId": "getOnlineShoppingItem",
+        "parameters": [
+          {
+            "name": "shopName",
+            "in": "path",
+            "required": true,
+            "description": "shop name",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "description": "item name",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetOnlineShoppingItemResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Error getting onlineShoppingItem.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
       "patch": {
-        "description": "Update an item",
+        "tags": [
+          "search"
+        ],
+        "description": "Update an item by shop name and item name.",
         "operationId": "updateOnlineShoppingItem",
         "parameters": [
           {
-            "name": "id",
+            "name": "shopName",
             "in": "path",
             "required": true,
-            "description": "Item uuid",
+            "description": "shop name",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "description": "item name",
             "schema": {
               "type": "string"
             }
@@ -210,7 +271,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateSearchResultRequest"
+                "$ref": "#/components/schemas/UpdateOnlineShoppingItemRequest"
               }
             }
           }
@@ -224,6 +285,34 @@
           },
           "default": {
             "description": "Error creating onlineShoppingItem.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sqs/produce/onlineshoppingitems": {
+      "post": {
+        "tags": [
+          "sqs-produce"
+        ],
+        "description": "Push onlineShoppingItem messages to SQS queue.",
+        "operationId": "sqsProduce",
+
+        "responses": {
+          "200": {
+            "description": "Pushed messages to SQS queue.",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "default": {
+            "description": "Error pushing messages to SQS queue",
             "content": {
               "application/json": {
                 "schema": {
@@ -281,7 +370,7 @@
           }
         }
       },
-      "UpdateSearchResultsRequest": {
+      "UpdateOnlineShoppingItemsRequest": {
         "type": "object",
         "properties": {
           "data": {
@@ -292,18 +381,16 @@
           }
         }
       },
-      "UpdateSearchResultRequest": {
+      "UpdateOnlineShoppingItemRequest": {
         "type": "object",
         "properties": {
           "data": {
             "type": "object",
-            "items": {
-              "$ref": "#/components/schemas/OnlineShoppingItemDto"
-            }
+            "$ref": "#/components/schemas/OnlineShoppingItemDto"
           }
         }
       },
-      "DeleteSearchResultsRequest": {
+      "DeleteOnlineShoppingItemsRequest": {
         "type": "object",
         "properties": {
           "data": {
@@ -314,7 +401,7 @@
           }
         }
       },
-      "CreateSearchResultsRequest": {
+      "CreateOnlineShoppingItemsRequest": {
         "type": "object",
         "properties": {
           "data": {
@@ -325,7 +412,7 @@
           }
         }
       },
-      "GetSearchResultsResponse": {
+      "GetOnlineShoppingItemsResponse": {
         "type": "object",
         "properties": {
           "data": {
@@ -333,6 +420,14 @@
             "items": {
               "$ref": "#/components/schemas/OnlineShoppingItemDto"
             }
+          }
+        }
+      },
+      "GetOnlineShoppingItemResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/OnlineShoppingItemDto"
           }
         }
       },
