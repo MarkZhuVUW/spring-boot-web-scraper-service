@@ -3,7 +3,6 @@ package net.markz.webscraper.api.services;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import net.markz.webscraper.api.daos.searchdao.OnlineShoppingItem;
 import net.markz.webscraper.api.daos.searchdao.SearchDao;
 import net.markz.webscraper.api.exceptions.WebscraperException;
 import net.markz.webscraper.api.parsers.DtoDataParser;
@@ -29,23 +28,38 @@ public class SearchService {
   private final ParserFactory parserFactory;
 
   public void createOnlineShoppingItems(final List<OnlineShoppingItemDto> onlineShoppingItemDtos) {
-    final var onlineShoppingItems = onlineShoppingItemDtos.stream().map(DtoDataParser::parseDto).toList();
 
-    if(hasDuplicateItem(onlineShoppingItems)) {
+    if(hasDuplicateItem(onlineShoppingItemDtos)) {
       throw new WebscraperException(HttpStatus.BAD_REQUEST, "Duplicate item detected. Aborting item creation.");
     }
 
-    searchDao.upsertOnlineShoppingItems(
-            onlineShoppingItems
+    searchDao.upsertOnlineShoppingItems(onlineShoppingItemDtos.stream().map(DtoDataParser::parseDto).toList());
+  }
+
+  public OnlineShoppingItemDto getOnlineShoppingItem(final OnlineShoppingItemDto onlineShoppingItemDto) {
+
+    final var userId = "markz";
+
+    onlineShoppingItemDto.setUserId(userId);
+    final var item = searchDao.getOnlineShoppingItemByPrimaryKey(DtoDataParser.parseDto(onlineShoppingItemDto));
+
+    return DtoDataParser.parseData(
+            item.orElseThrow(() -> new WebscraperException(HttpStatus.BAD_REQUEST, String.format("Cannot find item=%s", onlineShoppingItemDto)))
     );
   }
 
-  public OnlineShoppingItemDto getOnlineShoppingItem(final OnlineShoppingItem onlineShoppingItem) {
-    return DtoDataParser.parseData(searchDao.getOnlineShoppingItemByPrimaryKey(onlineShoppingItem));
-  }
+  public boolean hasDuplicateItem(final List<OnlineShoppingItemDto> onlineShoppingItemDtos) {
+    final var duplicateItems = onlineShoppingItemDtos
+            .stream()
+            .filter(item -> {
+      try {
+       return getOnlineShoppingItem(item) != null;
+      } catch (Exception e) {
+        return false; // swallow exception if item not found.
+      }
+    })
 
-  public boolean hasDuplicateItem(final List<OnlineShoppingItem> onlineShoppingItems) {
-    final var duplicateItems = onlineShoppingItems.stream().filter(item ->  (item) != null).toList();
+            .toList();
     if(duplicateItems.isEmpty()) {
       return false;
     }
@@ -69,9 +83,11 @@ public class SearchService {
   }
 
   public void updateOnlineShoppingItems(final List<OnlineShoppingItemDto> onlineShoppingItemDtos) {
-    searchDao.upsertOnlineShoppingItems(
-            onlineShoppingItemDtos.stream().map(DtoDataParser::parseDto).toList()
-    );
+
+    final var userId = "markz";
+
+    onlineShoppingItemDtos.forEach(onlineShoppingItemDto -> onlineShoppingItemDto.setUserId(userId));
+    searchDao.upsertOnlineShoppingItems(onlineShoppingItemDtos.stream().map(DtoDataParser::parseDto).toList());
   }
 
   public List<OnlineShoppingItemDto> scrapeSearchResults(

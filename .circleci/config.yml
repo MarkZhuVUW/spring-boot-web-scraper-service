@@ -52,7 +52,7 @@ jobs:
       - attach_workspace:
           at: ./
       - run:
-          name: Copy api.jar to artifacts folder and release it to GitHub
+          name: Copy api.jar and client.jar to artifacts folder and release it to GitHub
           command: |
             cd ./scripts
             chmod +x deploy-github-releases.sh

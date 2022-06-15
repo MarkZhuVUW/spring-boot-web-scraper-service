@@ -18,20 +18,17 @@ package net.markz.webscraper.api.daos.converters;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTypeConverter;
 
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.LocalDateTime;
 
-public class OffsetDateTimeConverter implements DynamoDBTypeConverter<String, OffsetDateTime> {
+public class LocalDateTimeToStringConverter implements DynamoDBTypeConverter<String, LocalDateTime> {
 
-    public static String ISO8601 = "yyyy-MM-dd'T'HH:mm:ss'Z'";
     @Override
-    public String convert(OffsetDateTime dt) {
-        final var fmt = DateTimeFormatter.ofPattern(ISO8601);
-        return fmt.format(dt);
+    public String convert(LocalDateTime localDateTime) {
+        return localDateTime.toString();
     }
 
     @Override
-    public OffsetDateTime unconvert(String localDate) {
-        return OffsetDateTime.parse(localDate);
+    public LocalDateTime unconvert(String s) {
+        return LocalDateTime.parse(s);
     }
 }

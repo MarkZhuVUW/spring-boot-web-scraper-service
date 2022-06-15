@@ -5,6 +5,7 @@ import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.model.DeleteMessageRequest;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
+import net.markz.webscraper.api.services.DistributedLockService;
 import net.markz.webscraper.api.sqs.Message;
 import org.slf4j.Logger;
 
@@ -20,6 +21,7 @@ public abstract class AbstractEventProcessor<T> {
     private final AbstractEventErrorHandler errorHandler;
     private final String sqsQueueUrl;
     private final AmazonSQS amazonSQS;
+    private final DistributedLockService distributedLockService;
 
     @PreDestroy
     public void shutdown() {
@@ -42,21 +44,25 @@ public abstract class AbstractEventProcessor<T> {
     }
 
     private void processMessage(final SQSEvent.SQSMessage message) {
+        getLogger().info("Parsing message body={}", message);
+        final var parsedMessage = parseMessage(message);
+        getLogger().info("Parsed message={}", parsedMessage);
+
+//        final var lockValue = distributedLockService.tryLock(getLockKey(parsedMessage.getData()), getLockTimeout());
 
         try {
 
-            getLogger().info("Parsing message body={}", message);
-            final var parsedMessage = parseMessage(message);
-            getLogger().info("Parsed message={}", parsedMessage);
 
-            if(!shouldIgnoreMessage(parsedMessage)) {
-                getLogger().info("Message received and not ignored. Start processing message body={}", message.getBody());
-                processMessage(parsedMessage);
+            if(shouldIgnoreMessage(parsedMessage)) {
+                getLogger().info("Message received and ignored. Stop processing message body={}", message.getBody());
             }
+            processMessage(parsedMessage);
             acknowledge(message);
         } catch(Exception e) {
             getLogger().error("Failed processing message={}. Exception thrown: {}", message, e);
             errorHandler.replayMessage(message);
+        } finally {
+//            distributedLockService.release(getLockKey(parsedMessage.getData()), lockValue);
         }
 
     }
@@ -67,6 +73,10 @@ public abstract class AbstractEventProcessor<T> {
 
     public abstract Message<T> parseMessage(final SQSEvent.SQSMessage message);
 
+    /**
+     * Acknowledge the sqs message, delete it in the queue.
+     * @param message
+     */
     private void acknowledge(SQSEvent.SQSMessage message) {
         final var req = new DeleteMessageRequest(this.sqsQueueUrl, message.getReceiptHandle());
         this.amazonSQS.deleteMessage(req);
@@ -76,4 +86,16 @@ public abstract class AbstractEventProcessor<T> {
     public abstract Logger getLogger();
 
     public abstract boolean shouldIgnoreMessage(final Message<T> message);
+
+    /**
+     * Timeout to release the lock.
+     * @return
+     */
+    public abstract long getLockTimeout();
+
+    /**
+     * Lock key.
+     * @return
+     */
+    public abstract String getLockKey(T obj);
 }

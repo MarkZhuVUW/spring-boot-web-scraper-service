@@ -122,7 +122,7 @@
           }
         }
       },
-      "put": {
+      "patch": {
         "tags": [
           "search"
         ],
@@ -299,7 +299,7 @@
     "/sqs/produce/onlineshoppingitems": {
       "post": {
         "tags": [
-          "sqs-produce"
+          "sqs"
         ],
         "description": "Push onlineShoppingItem messages to SQS queue.",
         "operationId": "sqsProduce",
@@ -313,6 +313,34 @@
           },
           "default": {
             "description": "Error pushing messages to SQS queue",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sqs/poll/onlineshoppingitems": {
+      "post": {
+        "tags": [
+          "sqs"
+        ],
+        "description": "Poll onlineShoppingItem messages from SQS queue.",
+        "operationId": "sqsPoll",
+
+        "responses": {
+          "200": {
+            "description": "Successfully polled messages from SQS queue.",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "default": {
+            "description": "Error polling messages from SQS queue",
             "content": {
               "application/json": {
                 "schema": {

@@ -3,7 +3,8 @@ package net.markz.webscraper.api.parsers;
 import net.markz.webscraper.api.daos.searchdao.OnlineShoppingItem;
 import net.markz.webscraper.model.OnlineShoppingItemDto;
 
-public class DtoDataParser {
+public record DtoDataParser() {
+
     public static OnlineShoppingItem parseDto(OnlineShoppingItemDto onlineShoppingItemDto) {
         return OnlineShoppingItem
                 .builder()

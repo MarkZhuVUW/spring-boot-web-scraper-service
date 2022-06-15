@@ -4,13 +4,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.ToString;
 
-import java.util.Calendar;
+import java.time.LocalDateTime;
 
 @Data
 @ToString
 @Builder
 public class Message<T> {
     private String eventType;
-    private Calendar lastModified;
+    private LocalDateTime lastModified;
     private T data;
 }

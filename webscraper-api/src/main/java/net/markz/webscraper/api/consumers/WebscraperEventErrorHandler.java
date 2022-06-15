@@ -7,6 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
+
+/**
+ * Currently my ec2 instances are under-utilized
+ * so I am temporarily polling from sqs queue with my webscraper service application load balancer.
+ * TODO: Refactor this to lambda
+ */
+
 @Slf4j
 @Component
 public class WebscraperEventErrorHandler extends AbstractEventErrorHandler {

@@ -8,15 +8,17 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTypeConverted;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTypeConvertedEnum;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTyped;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBVersionAttribute;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import net.markz.webscraper.api.daos.converters.OffsetDateTimeConverter;
+import net.markz.webscraper.api.daos.converters.LocalDateTimeToStringConverter;
 import net.markz.webscraper.model.OnlineShopDto;
 
-import java.util.Calendar;
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @Builder
@@ -24,7 +26,12 @@ import java.util.Calendar;
 @DynamoDBTable(tableName = "OnlineShoppingItems")
 @NoArgsConstructor
 @ToString
+@EqualsAndHashCode(exclude = {"ttl", "lastModifiedDate"})
 public class OnlineShoppingItem {
+
+    // For optimistic locking.
+    @DynamoDBVersionAttribute
+    private Integer version;
 
     @DynamoDBAttribute(attributeName = "onlineShop")
     @DynamoDBTypeConvertedEnum
@@ -55,19 +62,19 @@ public class OnlineShoppingItem {
     private String userId;
 
     @DynamoDBAttribute(attributeName = "lastModifiedDate")
-    @DynamoDBTypeConverted(converter = OffsetDateTimeConverter.class)
+    @DynamoDBTypeConverted(converter = LocalDateTimeToStringConverter.class)
     @DynamoDBTyped(DynamoDBMapperFieldModel.DynamoDBAttributeType.S)
-    private Calendar lastModifiedDate;
+    private LocalDateTime lastModifiedDate;
 
     // Use this attribute to let dynamo delete expired records.
     @DynamoDBAttribute(attributeName = "ttl")
     private long ttl;
 
-    public Calendar getLastModifiedDate() {
+    public LocalDateTime getLastModifiedDate() {
         return this.lastModifiedDate;
     }
 
-    public void setLastModifiedDate(final Calendar lastModifiedDate) {
+    public void setLastModifiedDate(final LocalDateTime lastModifiedDate) {
         this.lastModifiedDate = lastModifiedDate;
     }
 
@@ -82,7 +89,7 @@ public class OnlineShoppingItem {
 
     @DynamoDBRangeKey(attributeName = "SK")
     public String getSK() {
-        return String.format("ITEM%s#%s", this.onlineShopName, this.name);
+        return String.format("ITEM#%s#%s", this.onlineShopName, this.name);
     }
 
     public void setSK(String sk) {
@@ -106,5 +113,4 @@ public class OnlineShoppingItem {
 //    public void setGSI1SK(String gsi1Sk) {
 //        // intentionally left blank: SK is set by setting the totalUniqueLiftRiders attribute
 //    }
-
 }

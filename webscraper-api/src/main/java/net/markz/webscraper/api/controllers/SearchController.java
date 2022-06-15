@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import net.markz.webscraper.api.SearchApiDelegate;
-import net.markz.webscraper.api.parsers.DtoDataParser;
 import net.markz.webscraper.api.services.SearchService;
 import net.markz.webscraper.api.utils.Utils;
 import net.markz.webscraper.model.CreateOnlineShoppingItemsRequest;
@@ -98,10 +97,10 @@ public class SearchController implements SearchApiDelegate {
         return Utils.translateException(
                 () ->
                         new GetOnlineShoppingItemResponse()
-                                .data(searchService.getOnlineShoppingItem(DtoDataParser.parseDto(
+                                .data(searchService.getOnlineShoppingItem(
                                         new OnlineShoppingItemDto()
                                                 .onlineShopName(shopName)
-                                                .name(name))
+                                                .name(name)
                                 ))
         );
     }
