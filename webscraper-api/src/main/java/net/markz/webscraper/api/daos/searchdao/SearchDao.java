@@ -6,7 +6,9 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.markz.webscraper.api.exceptions.WebscraperException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -22,25 +24,29 @@ public class SearchDao {
 
     private final AmazonDynamoDB amazonDynamoDB;
 
-  /**
-   * On failure to upsert any of the onlineShoppingItems I will continue to do upsert the rest of the items.
-   * The "lastModifiedDate" attribute is used to implement eventually consistent upsertion.
-   *
-   * The "version" attribute can be used to implement optimistic locking on the table.
-   * @param onlineShoppingItems
-   */
-  public void upsertOnlineShoppingItems(final List<OnlineShoppingItem> onlineShoppingItems) {
-      final var now = LocalDateTime.now();
+    /**
+     * On failure to upsert any of the onlineShoppingItems I will continue to do upsert the rest of the items.
+     * The "lastModifiedDate" attribute is used to implement eventually consistent upsertion.
+     *
+     * The "version" attribute can be used to implement optimistic locking on the table.
+     * @param onlineShoppingItems
+     */
+    public void upsertOnlineShoppingItems(final List<OnlineShoppingItem> onlineShoppingItems) {
+        final var now = LocalDateTime.now();
 
-      // Set last modified date.
-      onlineShoppingItems.forEach(item -> item.setLastModifiedDate(now));
+        // Set last modified date.
+        onlineShoppingItems.forEach(item -> item.setLastModifiedDate(now));
 
-      // Set ttl
-      onlineShoppingItems.forEach(item -> item.setTtl(99999999L));
+        // Set ttl
+        onlineShoppingItems.forEach(item -> item.setTtl(99999999L));
 
-      // batchSave creates items if they do not exist by checking its primary key.
-      // It will update items if they do exist.
-      new DynamoDBMapper(amazonDynamoDB).batchSave(onlineShoppingItems);
+        // batchSave creates items if they do not exist by checking its primary key.
+        // It will update items if they do exist.
+        final var failedBatches = new DynamoDBMapper(amazonDynamoDB).batchSave(onlineShoppingItems);
+        if(!failedBatches.isEmpty()) {
+            throw new WebscraperException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to update items=" + onlineShoppingItems);
+
+        }
     }
 
     public List<OnlineShoppingItem> getOnlineShoppingItemsByUser(final String userId) {
@@ -70,7 +76,10 @@ public class SearchDao {
     }
 
     public void deleteOnlineShoppingItems(final List<OnlineShoppingItem> onlineShoppingItems) {
-        new DynamoDBMapper(amazonDynamoDB).batchDelete(onlineShoppingItems);
+        final var failedBatches = new DynamoDBMapper(amazonDynamoDB).batchDelete(onlineShoppingItems);
+        if(!failedBatches.isEmpty()) {
+            throw new WebscraperException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to delete items=" + onlineShoppingItems);
+        }
     }
 
 }

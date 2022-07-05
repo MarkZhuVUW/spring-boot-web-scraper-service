@@ -35,7 +35,6 @@
         <awssdk.version>2.17.142</awssdk.version>
         <lambda-java-events.version>3.11.0</lambda-java-events.version>
         <lambda-java-core.version>1.2.1</lambda-java-core.version>
-        <log4j-version>2.17.1</log4j-version>
         <aws.sdk.version>1.12.217</aws.sdk.version>
         <test.containers.version>1.17.2</test.containers.version>
     </properties>
@@ -157,18 +156,21 @@
                 <version>3.9</version>
             </dependency>
             <!--  Logging  -->
-
-            <!--  DB  -->
             <dependency>
-                <groupId>org.postgresql</groupId>
-                <artifactId>postgresql</artifactId>
-                <version>42.2.9</version>
-                <scope>compile</scope>
+
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-core</artifactId>
+                <version>1.2.3</version>
             </dependency>
             <dependency>
-                <groupId>org.hibernate</groupId>
-                <artifactId>hibernate-envers</artifactId>
-                <version>${hibernate.version}</version>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>1.2.3</version>
+            </dependency>
+            <dependency>
+                <groupId>net.logstash.logback</groupId>
+                <artifactId>logstash-logback-encoder</artifactId>
+                <version>6.2</version>
             </dependency>
 
             <!--  Utils  -->

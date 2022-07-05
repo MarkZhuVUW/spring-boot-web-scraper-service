@@ -51,4 +51,4 @@ amazon:
       url: bla
       name: webscraper-sqs-dlq
   distributed-locking-service:
-#    endpoint: redis://webscraper-service-redis
+#    endpoint: redis://webscraper-service-redis-cluster.api.markz-portfolio.com:6379

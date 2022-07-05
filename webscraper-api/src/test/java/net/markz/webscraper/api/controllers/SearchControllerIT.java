@@ -4,18 +4,17 @@ package net.markz.webscraper.api.controllers;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig;
-import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import lombok.extern.slf4j.Slf4j;
 import net.markz.webscraper.api.constants.Constants;
-import net.markz.webscraper.api.daos.searchdao.OnlineShoppingItem;
+import net.markz.webscraper.api.exceptions.WebscraperException;
 import net.markz.webscraper.model.CreateOnlineShoppingItemsRequest;
+import net.markz.webscraper.model.DeleteOnlineShoppingItemsRequest;
 import net.markz.webscraper.model.OnlineShopDto;
 import net.markz.webscraper.model.OnlineShoppingItemDto;
 import net.markz.webscraper.model.UpdateOnlineShoppingItemsRequest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +29,7 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
 
 import java.util.Objects;
 
+import static net.markz.webscraper.api.controllers.TestUtils.createTable;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -75,46 +75,75 @@ public class SearchControllerIT {
     @Test
     public void deleteExistingOnlineShoppingItem_success() {
 
-        // TODO
+        // Given
+        final var item1 = new OnlineShoppingItemDto()
+                .onlineShopName(OnlineShopDto.GOOGLE_SHOPPING.name())
+                .userId(USERID)
+                .uuid("testUUID1")
+                .name("testItem1");
+
+        final var createReq = new CreateOnlineShoppingItemsRequest()
+                .addDataItem(item1);
+
+        ResponseEntity<Void> createResp = searchController.createOnlineShoppingItems(createReq);
+
+        final var items = Objects.requireNonNull(
+                searchController
+                        .getOnlineShoppingItems()
+                        .getBody()
+        ).getData();
+
+        assertEquals(HttpStatus.OK, createResp.getStatusCode());
+        assertEquals(1, items.size());
+        assertEquals(item1, items.get(0));
+
+        item1.setSalePrice("123");
+        item1.setHref("123");
+
+        final var req = new DeleteOnlineShoppingItemsRequest()
+                .addDataItem(item1);
+
+        // When
+        final var result = Objects.requireNonNull(
+                searchController.deleteOnlineShoppingItems(req)
+        );
+
+        final var deletedItems = Objects.requireNonNull(
+                searchController
+                        .getOnlineShoppingItems()
+                        .getBody()
+        ).getData();
+
+        // Then
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertEquals(0, deletedItems.size());
 
     }
 
+
+    // By design batchDelete in dynamodb is idempotent. Running the same api multiple times does not generate error responses.
     @Test
-    public void deleteNonExistingOnlineShoppingItem_fail() {
+    public void deleteNonExistingOnlineShoppingItem_success() {
 
-        // TODO
+        // Given
+        final var item = new OnlineShoppingItemDto()
+                .onlineShopName(OnlineShopDto.GOOGLE_SHOPPING.name())
+                .userId(USERID)
+                .uuid("testUUID")
+                .name("testItem");
 
-    }
+        final var req = new DeleteOnlineShoppingItemsRequest().addDataItem(item);
 
+        // When
+        ResponseEntity<Void> result = searchController.deleteOnlineShoppingItems(req);
 
+        // Then
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        Assertions.assertThrows(
+                WebscraperException.class,
+                () -> searchController.getOnlineShoppingItem(item.getOnlineShopName(), item.getName())
+        );
 
-    @Test
-    public void upsertExistingOnlineShoppingItem_success() {
-
-        // TODO
-
-    }
-
-    @Test
-    public void upsertNonExistingOnlineShoppingItem_success() {
-
-      // TODO
-
-    }
-
-    @Test
-    public void upsertNonExistingOnlineShoppingItem_withLastModifiedDateBefore_fail() {
-       // TODO
-    }
-
-    @Test
-    public void upsertExistingOnlineShoppingItem_withLastModifiedDateBefore_fail() {
-        // TODO
-    }
-
-    @Test
-    public void deleteOnlineShoppingItem_withLastModifiedDateBefore_fail() {
-        // TODO
     }
 
     @Test
@@ -272,17 +301,6 @@ public class SearchControllerIT {
         return amazonDynamoDB;
     }
 
-    private void createTable(final AmazonDynamoDB amazonDynamoDB) {
-        log.debug("Creating table");
-        final var mapper = new DynamoDBMapper(amazonDynamoDB, DynamoDBMapperConfig.DEFAULT);
-        final var request =
-                mapper
-                        .generateCreateTableRequest(OnlineShoppingItem.class)
-                        .withTableName(Constants.DYNAMO_TABLE_NAME_ONLINESHOPPINGITEMS.getStr())
-                        .withProvisionedThroughput(new ProvisionedThroughput(1L, 1L));
 
-        amazonDynamoDB.createTable(request);
-        log.debug("Created table");
-    }
 
 }

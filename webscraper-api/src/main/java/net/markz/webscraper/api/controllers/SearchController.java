@@ -32,7 +32,7 @@ public class SearchController implements SearchApiDelegate {
     public ResponseEntity<GetOnlineShoppingItemsResponse> scrapeSearchResults(
             @NonNull final OnlineShopDto onlineShopName,
             @NonNull final String searchString) {
-        return Utils.translateException(
+        return Utils.handleException(
                 () ->
                         new GetOnlineShoppingItemsResponse()
                                 .data(searchService.scrapeSearchResults(onlineShopName, searchString))
@@ -41,7 +41,7 @@ public class SearchController implements SearchApiDelegate {
 
     @Override
     public ResponseEntity<GetOnlineShoppingItemsResponse> getOnlineShoppingItems() {
-        return Utils.translateException(
+        return Utils.handleException(
                 () ->
                         new GetOnlineShoppingItemsResponse()
                                 .data(searchService.getOnlineShoppingItems())
@@ -51,7 +51,7 @@ public class SearchController implements SearchApiDelegate {
     @Override
     public ResponseEntity<Void> createOnlineShoppingItems(
             final CreateOnlineShoppingItemsRequest createOnlineShoppingItemsRequest) {
-        return Utils.translateException(() -> {
+        return Utils.handleException(() -> {
             searchService.createOnlineShoppingItems(createOnlineShoppingItemsRequest.getData());
             return null;
         });
@@ -60,7 +60,7 @@ public class SearchController implements SearchApiDelegate {
     @Override
     public ResponseEntity<Void> updateOnlineShoppingItems(
             final UpdateOnlineShoppingItemsRequest updateOnlineShoppingItemsRequest) {
-        return Utils.translateException(() -> {
+        return Utils.handleException(() -> {
             searchService.updateOnlineShoppingItems(updateOnlineShoppingItemsRequest.getData());
             return null;
         });
@@ -69,7 +69,7 @@ public class SearchController implements SearchApiDelegate {
     @Override
     public ResponseEntity<Void> deleteOnlineShoppingItems(
             final DeleteOnlineShoppingItemsRequest deleteOnlineShoppingItemsRequest) {
-        return Utils.translateException(() -> {
+        return Utils.handleException(() -> {
             searchService.deleteOnlineShoppingItems(deleteOnlineShoppingItemsRequest.getData());
             return null;
         });
@@ -82,7 +82,7 @@ public class SearchController implements SearchApiDelegate {
             final String name,
             final UpdateOnlineShoppingItemRequest updateOnlineShoppingItemRequest
     ) {
-    return Utils.translateException(
+    return Utils.handleException(
         () -> {
           searchService.updateOnlineShoppingItems(List.of(updateOnlineShoppingItemRequest.getData()));
           return null;
@@ -94,7 +94,7 @@ public class SearchController implements SearchApiDelegate {
             final String shopName,
             final String name
     ) {
-        return Utils.translateException(
+        return Utils.handleException(
                 () ->
                         new GetOnlineShoppingItemResponse()
                                 .data(searchService.getOnlineShoppingItem(

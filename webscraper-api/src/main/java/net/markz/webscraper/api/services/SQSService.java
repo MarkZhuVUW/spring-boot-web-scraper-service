@@ -35,50 +35,42 @@ public class SQSService {
      * build them as messages and send them to an sqs queue for later consumption.
      */
     public void sqsProduce() {
-        final var queueName = env.getProperty("amazon.sqs.queue.name");
         final var queueUrl = env.getProperty("amazon.sqs.queue.url");
-//        try {
-//            CreateQueueResult create_result = sqs.createQueue(queueName);
-//        } catch (AmazonSQSException e) {
-//            if (!e.getErrorCode().equals("QueueAlreadyExists")) {
-//                throw e;
-//            }
-//        }
 
         final var onlineShoppingItems = searchService.getOnlineShoppingItems();
 
         final var objectMapper = new JsonMapper();
 
-    onlineShoppingItems
-        .parallelStream() // Concurrently send messages to sqs queue as we follow an eventually
-                          // consistent mechanism
-        .map(DtoDataParser::parseDto)
-        .forEach(
-            item -> {
-              final var message =
-                  Message.builder()
-                      .lastModified(LocalDateTime.now())
-                      .eventType(EventType.CRON_ITEM_UPDATE_AND_PRICE_CHANGE_ALERT.name())
-                      .data(item)
-                      .build();
-              try {
-                final var strMessage = objectMapper.writeValueAsString(message);
-                log.info("Sending stringified message={}", message);
+        onlineShoppingItems
+                .parallelStream() // Concurrently send messages to sqs queue as we follow an eventually
+                // consistent mechanism
+                .map(DtoDataParser::parseDto)
+                .forEach(
+                        item -> {
+                            final var message =
+                                    Message.builder()
+                                            .lastModified(LocalDateTime.now())
+                                            .eventType(EventType.CRON_ITEM_UPDATE_AND_PRICE_CHANGE_ALERT.name())
+                                            .data(item)
+                                            .build();
+                            try {
+                                final var strMessage = objectMapper.writeValueAsString(message);
+                                log.info("Sending stringified message={}", message);
 
-                final var sendMsgReq =
-                    new SendMessageRequest()
-                        .withQueueUrl(queueUrl)
-                        .withMessageBody(strMessage)
-                        .withDelaySeconds(
-                            Integer.parseInt(Constants.LAMBDA_REPLAY_DELAY_SECONDS.getStr()));
-                amazonSQS.sendMessage(sendMsgReq);
-                log.info("Sent message={}", message);
-              } catch (JsonProcessingException e) {
-                throw new WebscraperException(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    String.format("Message=%s cannot be parsed to string", message));
-              }
-            });
+                                final var sendMsgReq =
+                                        new SendMessageRequest()
+                                                .withQueueUrl(queueUrl)
+                                                .withMessageBody(strMessage)
+                                                .withDelaySeconds(
+                                                        Integer.parseInt(Constants.LAMBDA_REPLAY_DELAY_SECONDS.getStr()));
+                                amazonSQS.sendMessage(sendMsgReq);
+                                log.info("Sent message={}", message);
+                            } catch (JsonProcessingException e) {
+                                throw new WebscraperException(
+                                        HttpStatus.INTERNAL_SERVER_ERROR,
+                                        String.format("Message=%s cannot be parsed to string", message));
+                            }
+                        });
     }
 
     /**
