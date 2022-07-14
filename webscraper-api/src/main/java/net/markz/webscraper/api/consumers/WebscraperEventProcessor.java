@@ -39,7 +39,7 @@ public class WebscraperEventProcessor extends AbstractEventProcessor <OnlineShop
             final SearchService searchService,
             final Environment env,
             final DistributedLockService distributedLockService
-            ) {
+    ) {
         super(
                 buildExecutorService(),
                 errorHandler,
@@ -58,45 +58,47 @@ public class WebscraperEventProcessor extends AbstractEventProcessor <OnlineShop
     public void processMessage(final Message<OnlineShoppingItem> message) {
         log.info("Processing message={}", message);
 
-        final var onlineShoppingItem = message.getData();
 
-        // Scrape item in message body by exact item name
-        final var searchResult = searchService.scrapeSearchResults(
-                onlineShoppingItem.getOnlineShop(),
-                onlineShoppingItem.getName()
-        );
 
-        if(searchResult.isEmpty()) {
-            log.info(
-                    "Cannot find item in onlineShopName={}, item name={}",
+        message.getData().forEach(onlineShoppingItem -> {
+            // Scrape item in message body by exact item name
+            final var searchResult = searchService.scrapeSearchResults(
                     onlineShoppingItem.getOnlineShop(),
                     onlineShoppingItem.getName()
             );
-            throw new WebscraperException(
-                    HttpStatus.BAD_REQUEST,
-                    String.format("Error scraping for message item=%s, will replay later.", onlineShoppingItem)
-            );
-        }
+
+            if(searchResult.isEmpty()) {
+                log.info(
+                        "Cannot find item in onlineShopName={}, item name={}",
+                        onlineShoppingItem.getOnlineShop(),
+                        onlineShoppingItem.getName()
+                );
+                throw new WebscraperException(
+                        HttpStatus.BAD_REQUEST,
+                        String.format("Error scraping for message item=%s, will replay later.", onlineShoppingItem)
+                );
+            }
 
 
-        // Update item if they are not identical.
-        if(!onlineShoppingItem.getUuid().equals(searchResult.get(0).getUuid())) {
-            log.info(
-                    "uuid of the scraped item {} is different to the item in message body: {}. " +
-                            "Maybe the scraped item is not the same as whats in the message. Abort processing.",
-                    onlineShoppingItem.getUuid(),
-                    searchResult.get(0)
-            );
-            return;
-        }
+            // Update item if they are not identical.
+            if(!onlineShoppingItem.getUuid().equals(searchResult.get(0).getUuid())) {
+                log.info(
+                        "uuid of the scraped item {} is different to the item in message body: {}. " +
+                                "Maybe the scraped item is not the same as whats in the message. Abort processing.",
+                        onlineShoppingItem.getUuid(),
+                        searchResult.get(0)
+                );
+                return;
+            }
 
-        // Alert price change.
-        if(!onlineShoppingItem.getSalePrice().equals(searchResult.get(0).getSalePrice())) {
-            log.info("Current price={}, stored price={}", searchResult.get(0), onlineShoppingItem.getSalePrice());
-        // do alert
-        }
+            // Alert price change.
+            if(!onlineShoppingItem.getSalePrice().equals(searchResult.get(0).getSalePrice())) {
+                log.info("Current price={}, stored price={}", searchResult.get(0), onlineShoppingItem.getSalePrice());
+                // do alert
+            }
 
-        searchService.updateOnlineShoppingItems(List.of(searchResult.get(0)));
+            searchService.updateOnlineShoppingItems(List.of(searchResult.get(0)));
+        });
     }
 
     @Override
@@ -124,15 +126,21 @@ public class WebscraperEventProcessor extends AbstractEventProcessor <OnlineShop
     @Override
     public boolean shouldIgnoreMessage(final Message<OnlineShoppingItem> message) {
 
-        final var lastModified = message.getLastModified();
-        final var currentLastModified = DtoDataParser
-                        .parseDto(searchService.getOnlineShoppingItem(
-                                DtoDataParser.parseData(message.getData())
-                        ))
-                        .getLastModifiedDate();
+        return message.getData()
+                .stream()
+                .filter(item -> {
+                    final var messageLastModified = item.getLastModifiedDate();
+                    final var dbLastModified = DtoDataParser
+                            .parseDto(searchService.getOnlineShoppingItem(
+                                    DtoDataParser.parseData(item)
+                            ))
+                            .getLastModifiedDate();
 
 
-        return lastModified.isBefore(currentLastModified);
+                    return messageLastModified.isBefore(dbLastModified);
+                })
+                .toList()
+                .isEmpty();
     }
 
     @Override

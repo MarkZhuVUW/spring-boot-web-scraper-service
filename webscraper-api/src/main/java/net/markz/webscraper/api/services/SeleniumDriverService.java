@@ -49,7 +49,7 @@ public class SeleniumDriverService {
     log.debug("Getting new chrome driver instance");
 
 
-    final String remote_url_chrome = Arrays.stream(env.getActiveProfiles()).toList().contains("local") ?
+    final String remoteUrlChrome = Arrays.stream(env.getActiveProfiles()).toList().contains("local") ?
             NetworkConstants.LOCAL_SELENIUM_HOST_NAME.getStr() :
             NetworkConstants.ECS_SELENINUM_HOST_NAME.getStr();
     final ChromeOptions opts = new ChromeOptions();
@@ -64,13 +64,13 @@ public class SeleniumDriverService {
     opts.addArguments(String.format("user-agent=%s", userAgent));
 
     try {
-      final var remoteDriver = new RemoteWebDriver(new URL(remote_url_chrome), opts);
+      final var remoteDriver = new RemoteWebDriver(new URL(remoteUrlChrome), opts);
 
       log.debug("Got new chrome driver instance");
 
       return remoteDriver;
     } catch (MalformedURLException e) {
-      throw new WebscraperException(HttpStatus.INTERNAL_SERVER_ERROR, String.format("Invalid url: %s", remote_url_chrome));
+      throw new WebscraperException(HttpStatus.INTERNAL_SERVER_ERROR, String.format("Invalid url: %s", remoteUrlChrome));
     }
 
   }

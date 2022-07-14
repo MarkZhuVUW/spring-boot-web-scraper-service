@@ -82,11 +82,11 @@ public class SearchController implements SearchApiDelegate {
             final String name,
             final UpdateOnlineShoppingItemRequest updateOnlineShoppingItemRequest
     ) {
-    return Utils.handleException(
-        () -> {
-          searchService.updateOnlineShoppingItems(List.of(updateOnlineShoppingItemRequest.getData()));
-          return null;
-        });
+        return Utils.handleException(
+                () -> {
+                    searchService.updateOnlineShoppingItems(List.of(updateOnlineShoppingItemRequest.getData()));
+                    return null;
+                });
     }
 
     @Override

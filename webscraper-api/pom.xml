@@ -77,7 +77,7 @@
         <dependency>
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
-            logback.xml        </dependency>
+        </dependency>
 
         <!--  Utils  -->
         <!-- https://mvnrepository.com/artifact/org.threeten/threetenbp -->

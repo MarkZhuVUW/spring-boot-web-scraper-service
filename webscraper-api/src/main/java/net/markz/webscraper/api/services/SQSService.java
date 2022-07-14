@@ -18,7 +18,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -41,36 +41,35 @@ public class SQSService {
 
         final var objectMapper = new JsonMapper();
 
-        onlineShoppingItems
-                .parallelStream() // Concurrently send messages to sqs queue as we follow an eventually
-                // consistent mechanism
-                .map(DtoDataParser::parseDto)
-                .forEach(
-                        item -> {
-                            final var message =
-                                    Message.builder()
-                                            .lastModified(LocalDateTime.now())
-                                            .eventType(EventType.CRON_ITEM_UPDATE_AND_PRICE_CHANGE_ALERT.name())
-                                            .data(item)
-                                            .build();
-                            try {
-                                final var strMessage = objectMapper.writeValueAsString(message);
-                                log.info("Sending stringified message={}", message);
+    onlineShoppingItems
+        .parallelStream() // Concurrently send messages to sqs queue as we follow an eventually
+        // consistent mechanism
+        .map(DtoDataParser::parseDto)
+        .forEach(
+            item -> {
+              final var message =
+                  Message.builder()
+                      .eventType(EventType.CRON_ITEM_UPDATE_AND_PRICE_CHANGE_ALERT.name())
+                      .data(List.of(item))
+                      .build();
+              try {
+                final var strMessage = objectMapper.writeValueAsString(message);
+                log.info("Sending stringified message={}", message);
 
-                                final var sendMsgReq =
-                                        new SendMessageRequest()
-                                                .withQueueUrl(queueUrl)
-                                                .withMessageBody(strMessage)
-                                                .withDelaySeconds(
-                                                        Integer.parseInt(Constants.LAMBDA_REPLAY_DELAY_SECONDS.getStr()));
-                                amazonSQS.sendMessage(sendMsgReq);
-                                log.info("Sent message={}", message);
-                            } catch (JsonProcessingException e) {
-                                throw new WebscraperException(
-                                        HttpStatus.INTERNAL_SERVER_ERROR,
-                                        String.format("Message=%s cannot be parsed to string", message));
-                            }
-                        });
+                final var sendMsgReq =
+                    new SendMessageRequest()
+                        .withQueueUrl(queueUrl)
+                        .withMessageBody(strMessage)
+                        .withDelaySeconds(
+                            Integer.parseInt(Constants.LAMBDA_REPLAY_DELAY_SECONDS.getStr()));
+                amazonSQS.sendMessage(sendMsgReq);
+                log.info("Sent message={}", message);
+              } catch (JsonProcessingException e) {
+                throw new WebscraperException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    String.format("Message=%s cannot be parsed to string", message));
+              }
+            });
     }
 
     /**

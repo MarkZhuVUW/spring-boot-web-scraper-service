@@ -16,11 +16,8 @@
  */
 package net.markz.webscraper.api.configs;
 
-import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -32,22 +29,19 @@ import org.springframework.context.annotation.Profile;
 @Profile("!test")
 public class DynamoDBConfiguration {
 
-    @Value("${amazon.dynamo.endpoint}")
-    private String  endpoint;
-
-    @Value("${amazon.dynamo.region}")
-    private String  region;
+    @Value("${amazon.region}")
+    private String region;
 
     @Bean
-    public DynamoDBMapper dynamoDBMapper() {
+    public AmazonDynamoDB dynamoDBMapper() {
 
         log.debug("Creating dynamodb client");
         final AmazonDynamoDB client = AmazonDynamoDBClientBuilder
                 .standard()
-                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpoint, "ap-southeast-2"))
+                .withRegion(region)
                 .build();
         log.debug("Created dynamodb client");
 
-        return new DynamoDBMapper(client, DynamoDBMapperConfig.DEFAULT);
+        return client;
     }
 }

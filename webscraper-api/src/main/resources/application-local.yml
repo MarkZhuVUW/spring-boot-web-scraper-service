@@ -1,19 +1,7 @@
-#spring:
-#  jackson:
-#    default-property-inclusion: non_null
-#    deserialization:
-#      read-unknown-enum-values-as-null: true
-#      fail-on-unknown-properties: false
-#  jpa:
-#    properties:
-#      hibernate:
-#        show_sql: true
-#        format_sql: true
-#        order_by:
-#          default_null_ordering: last
+
 logging:
   level:
-    root: ERROR
+    root: DEBUG
 info:
   app:
     name: 'webscraper'
@@ -40,15 +28,11 @@ management:
       graphite:
         enabled: false
 amazon:
-  dynamo:
-    endpoint: http://dynamodb-local:8000/
-    region: ap-southeast-2
+  region: ap-southeast-2
   sqs:
     queue:
-      url: bla
+      url: https://sqs.ap-southeast-2.amazonaws.com/142621353074/webscraper-sqs-queue
       name: webscraper-sqs-queue
     dlq:
-      url: bla
+      url: https://sqs.ap-southeast-2.amazonaws.com/142621353074/webscraper-sqs-dlq
       name: webscraper-sqs-dlq
-  distributed-locking-service:
-#    endpoint: redis://webscraper-service-redis-cluster.api.markz-portfolio.com:6379

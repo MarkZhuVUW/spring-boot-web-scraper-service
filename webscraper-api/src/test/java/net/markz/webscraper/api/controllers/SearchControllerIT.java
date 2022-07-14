@@ -1,9 +1,7 @@
 package net.markz.webscraper.api.controllers;
 
 
-import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import lombok.extern.slf4j.Slf4j;
 import net.markz.webscraper.api.constants.Constants;
 import net.markz.webscraper.api.exceptions.WebscraperException;
@@ -12,20 +10,14 @@ import net.markz.webscraper.model.DeleteOnlineShoppingItemsRequest;
 import net.markz.webscraper.model.OnlineShopDto;
 import net.markz.webscraper.model.OnlineShoppingItemDto;
 import net.markz.webscraper.model.UpdateOnlineShoppingItemsRequest;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.output.Slf4jLogConsumer;
 
 import java.util.Objects;
 
@@ -36,8 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ActiveProfiles("test")
 @SpringBootTest
 @Slf4j
-@Configuration
-public class SearchControllerIT {
+class SearchControllerIT extends ITBase {
 
     @Autowired
     private SearchController searchController;
@@ -47,33 +38,14 @@ public class SearchControllerIT {
 
     private static final String USERID = "markz";
 
-    private static final GenericContainer LOCALSTACK;
-
-    static {
-
-        LOCALSTACK = new GenericContainer("amazon/dynamodb-local:latest")
-                .withCommand("-jar DynamoDBLocal.jar -inMemory -sharedDb")
-                .withExposedPorts(8000)
-                .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger(
-                        SearchControllerIT.class)));
-        LOCALSTACK.start();
-
-    }
-
     @AfterEach
-    public void afterEach() {
+    void afterEach() {
         amazonDynamoDB.deleteTable(Constants.DYNAMO_TABLE_NAME_ONLINESHOPPINGITEMS.getStr());
         createTable(amazonDynamoDB);
     }
 
-    @AfterAll
-    public static void terminate() {
-        LOCALSTACK.stop();
-
-    }
-
     @Test
-    public void deleteExistingOnlineShoppingItem_success() {
+    void deleteExistingOnlineShoppingItem_success() {
 
         // Given
         final var item1 = new OnlineShoppingItemDto()
@@ -123,7 +95,7 @@ public class SearchControllerIT {
 
     // By design batchDelete in dynamodb is idempotent. Running the same api multiple times does not generate error responses.
     @Test
-    public void deleteNonExistingOnlineShoppingItem_success() {
+    void deleteNonExistingOnlineShoppingItem_success() {
 
         // Given
         final var item = new OnlineShoppingItemDto()
@@ -147,7 +119,7 @@ public class SearchControllerIT {
     }
 
     @Test
-    public void upsertNonExistingOnlineShoppingItems_success() {
+    void upsertNonExistingOnlineShoppingItems_success() {
 
         // Given
         final var item = new OnlineShoppingItemDto()
@@ -170,7 +142,7 @@ public class SearchControllerIT {
     }
 
     @Test
-    public void upsertNonExistingOnlineShoppingItems_withNonEmptyDb_success() {
+    void upsertNonExistingOnlineShoppingItems_withNonEmptyDb_success() {
 
         // Given
         final var existingItem = new OnlineShoppingItemDto()
@@ -206,7 +178,7 @@ public class SearchControllerIT {
     }
 
     @Test
-    public void getOnlineShoppingItems_success() {
+    void getOnlineShoppingItems_success() {
 
         // Given
         final var item1 = new OnlineShoppingItemDto()
@@ -240,7 +212,7 @@ public class SearchControllerIT {
     }
 
     @Test
-    public void upsertExistingOnlineShoppingItems_success() {
+    void upsertExistingOnlineShoppingItems_success() {
 
         // Given
         final var item1 = new OnlineShoppingItemDto()
@@ -284,21 +256,6 @@ public class SearchControllerIT {
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertEquals(1, updatedItems.size());
         assertEquals(item1, updatedItems.get(0));
-    }
-
-    @Bean
-    public AmazonDynamoDB initializeAmazonDynamoDB() {
-
-        log.debug("Creating dynamodb client");
-        final AmazonDynamoDB amazonDynamoDB = AmazonDynamoDBClientBuilder
-                .standard()
-                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(String.format("http://localhost:%d", LOCALSTACK.getMappedPort(8000)), "ap-southeast-2"))
-                .build();
-        log.debug("Created dynamodb client");
-
-
-        createTable(amazonDynamoDB);
-        return amazonDynamoDB;
     }
 
 

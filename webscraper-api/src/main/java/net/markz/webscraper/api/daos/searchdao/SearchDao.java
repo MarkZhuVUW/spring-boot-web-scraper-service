@@ -45,7 +45,6 @@ public class SearchDao {
         final var failedBatches = new DynamoDBMapper(amazonDynamoDB).batchSave(onlineShoppingItems);
         if(!failedBatches.isEmpty()) {
             throw new WebscraperException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to update items=" + onlineShoppingItems);
-
         }
     }
 
