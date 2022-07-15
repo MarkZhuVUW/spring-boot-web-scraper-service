@@ -113,8 +113,8 @@ public class WebscraperEventProcessor extends AbstractEventProcessor <OnlineShop
         } catch (JsonProcessingException e) {
             throw new WebscraperException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
-                    String.format("Message body=%s cannot be parsed from string", message.getBody())
-            );
+                    e.getMessage());
+
         }
     }
 

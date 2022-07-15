@@ -9,6 +9,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTypeConverted;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTypeConvertedEnum;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTyped;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBVersionAttribute;
+import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,44 +30,56 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(exclude = {"ttl", "lastModifiedDate"})
 public class OnlineShoppingItem {
 
-    // For optimistic locking.
+    @SerializedName("version")
     @DynamoDBVersionAttribute
     private Integer version;
 
+    @SerializedName("onlineShop")
     @DynamoDBAttribute(attributeName = "onlineShop")
     @DynamoDBTypeConvertedEnum
     private OnlineShopDto onlineShop;
 
+    @SerializedName("onlineShopName                                                                                              ")
     @DynamoDBAttribute(attributeName = "onlineShopName")
     private String onlineShopName;
 
+    @SerializedName("salePrice")
     @DynamoDBAttribute(attributeName = "salePrice")
     private String salePrice;
 
+    @SerializedName("name")
     @DynamoDBAttribute(attributeName = "name")
     private String name;
 
+    @SerializedName("isSaved")
     @DynamoDBAttribute(attributeName = "isSaved")
     private Boolean isSaved;
 
+    @SerializedName("imageUrl")
     @DynamoDBAttribute(attributeName = "imageUrl")
     private String imageUrl;
 
+    @SerializedName("href")
     @DynamoDBAttribute(attributeName = "href")
     private String href;
 
+    @SerializedName("uuid")
     @DynamoDBAttribute(attributeName = "uuid")
     private String uuid;
 
+    @SerializedName("userId")
     @DynamoDBAttribute(attributeName = "userId")
     private String userId;
 
+    @SerializedName("lastModifiedDate")
     @DynamoDBAttribute(attributeName = "lastModifiedDate")
     @DynamoDBTypeConverted(converter = LocalDateTimeToStringConverter.class)
     @DynamoDBTyped(DynamoDBMapperFieldModel.DynamoDBAttributeType.S)
     private LocalDateTime lastModifiedDate;
 
+
     // Use this attribute to let dynamo delete expired records.
+    @SerializedName("ttl")
     @DynamoDBAttribute(attributeName = "ttl")
     private long ttl;
 
