@@ -10,9 +10,11 @@ import net.markz.webscraper.model.DeleteOnlineShoppingItemsRequest;
 import net.markz.webscraper.model.OnlineShopDto;
 import net.markz.webscraper.model.OnlineShoppingItemDto;
 import net.markz.webscraper.model.UpdateOnlineShoppingItemsRequest;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
@@ -23,11 +25,12 @@ import java.util.Objects;
 
 import static net.markz.webscraper.api.controllers.TestUtils.createTable;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 @ActiveProfiles("test")
 @SpringBootTest
 @Slf4j
+@ExtendWith(MockitoExtension.class)
 class SearchControllerIT extends ITBase {
 
     @Autowired
@@ -38,7 +41,7 @@ class SearchControllerIT extends ITBase {
 
     private static final String USERID = "markz";
 
-    @AfterEach
+    @BeforeEach
     void afterEach() {
         amazonDynamoDB.deleteTable(Constants.DYNAMO_TABLE_NAME_ONLINESHOPPINGITEMS.getStr());
         createTable(amazonDynamoDB);
@@ -67,7 +70,11 @@ class SearchControllerIT extends ITBase {
 
         assertEquals(HttpStatus.OK, createResp.getStatusCode());
         assertEquals(1, items.size());
-        assertEquals(item1, items.get(0));
+        assertNotEquals(item1.getLastModifiedDate(), items.get(0).getLastModifiedDate());
+        assertEquals(item1.getOnlineShopName(), items.get(0).getOnlineShopName());
+        assertEquals(item1.getName(), items.get(0).getName());
+        assertEquals(item1.getUserId(), items.get(0).getUserId());
+        assertEquals(item1.getUuid(), items.get(0).getUuid());
 
         item1.setSalePrice("123");
         item1.setHref("123");
@@ -135,10 +142,15 @@ class SearchControllerIT extends ITBase {
 
         // Then
         assertEquals(HttpStatus.OK, result.getStatusCode());
-        assertEquals(item, Objects.requireNonNull(
-                searchController.getOnlineShoppingItem(item.getOnlineShopName(), item.getName()).getBody()
-                ).getData()
-        );
+
+        final var dbItem = Objects.requireNonNull(searchController.getOnlineShoppingItem(item.getOnlineShopName(), item.getName()).getBody()).getData();
+
+        assertNotEquals(item.getLastModifiedDate(), dbItem.getLastModifiedDate());
+        assertEquals(item.getOnlineShopName(), dbItem.getOnlineShopName());
+        assertEquals(item.getName(), dbItem.getName());
+        assertEquals(item.getUserId(), dbItem.getUserId());
+        assertEquals(item.getUuid(), dbItem.getUuid());
+
     }
 
     @Test
@@ -171,9 +183,18 @@ class SearchControllerIT extends ITBase {
         // Then
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertEquals(2, items.size());
-        assertTrue(items.contains(existingItem));
-        assertTrue(items.contains(nonExistingItem));
 
+        assertNotEquals(existingItem.getLastModifiedDate(), items.get(0).getLastModifiedDate());
+        assertEquals(existingItem.getOnlineShopName(), items.get(0).getOnlineShopName());
+        assertEquals(existingItem.getName(), items.get(0).getName());
+        assertEquals(existingItem.getUserId(), items.get(0).getUserId());
+        assertEquals(existingItem.getUuid(), items.get(0).getUuid());
+
+        assertNotEquals(nonExistingItem.getLastModifiedDate(), items.get(1).getLastModifiedDate());
+        assertEquals(nonExistingItem.getOnlineShopName(), items.get(1).getOnlineShopName());
+        assertEquals(nonExistingItem.getName(), items.get(1).getName());
+        assertEquals(nonExistingItem.getUserId(), items.get(1).getUserId());
+        assertEquals(nonExistingItem.getUuid(), items.get(1).getUuid());
 
     }
 
@@ -206,8 +227,17 @@ class SearchControllerIT extends ITBase {
 
         // Then
         assertEquals(2, resultList.size());
-        assertTrue(resultList.contains(item1));
-        assertTrue(resultList.contains(item2));
+        assertNotEquals(resultList.get(0).getLastModifiedDate(), item1.getLastModifiedDate());
+        assertEquals(resultList.get(0).getOnlineShopName(), item1.getOnlineShopName());
+        assertEquals(resultList.get(0).getName(), item1.getName());
+        assertEquals(resultList.get(0).getUserId(), item1.getUserId());
+        assertEquals(resultList.get(0).getUuid(), item1.getUuid());
+
+        assertNotEquals(resultList.get(1).getLastModifiedDate(), item2.getLastModifiedDate());
+        assertEquals(resultList.get(1).getOnlineShopName(), item2.getOnlineShopName());
+        assertEquals(resultList.get(1).getName(), item2.getName());
+        assertEquals(resultList.get(1).getUserId(), item2.getUserId());
+        assertEquals(resultList.get(1).getUuid(), item2.getUuid());
 
     }
 
@@ -234,7 +264,11 @@ class SearchControllerIT extends ITBase {
 
         assertEquals(HttpStatus.OK, createResp.getStatusCode());
         assertEquals(1, items.size());
-        assertEquals(item1, items.get(0));
+        assertNotEquals(item1.getLastModifiedDate(), items.get(0).getLastModifiedDate());
+        assertEquals(item1.getOnlineShopName(), items.get(0).getOnlineShopName());
+        assertEquals(item1.getName(), items.get(0).getName());
+        assertEquals(item1.getUserId(), items.get(0).getUserId());
+        assertEquals(item1.getUuid(), items.get(0).getUuid());
 
         item1.setSalePrice("123");
         item1.setHref("123");
@@ -255,7 +289,11 @@ class SearchControllerIT extends ITBase {
         // Then
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertEquals(1, updatedItems.size());
-        assertEquals(item1, updatedItems.get(0));
+        assertNotEquals(item1.getLastModifiedDate(), updatedItems.get(0).getLastModifiedDate());
+        assertEquals(item1.getOnlineShopName(), updatedItems.get(0).getOnlineShopName());
+        assertEquals(item1.getName(), updatedItems.get(0).getName());
+        assertEquals(item1.getUserId(), updatedItems.get(0).getUserId());
+        assertEquals(item1.getUuid(), updatedItems.get(0).getUuid());
     }
 
 

@@ -31,21 +31,23 @@ public class SearchDao {
      * The "version" attribute can be used to implement optimistic locking on the table.
      * @param onlineShoppingItems
      */
-    public void upsertOnlineShoppingItems(final List<OnlineShoppingItem> onlineShoppingItems) {
+    public List<DynamoDBMapper.FailedBatch> upsertOnlineShoppingItems(final List<OnlineShoppingItem> onlineShoppingItems) {
         final var now = LocalDateTime.now();
 
         // Set last modified date.
-        onlineShoppingItems.forEach(item -> item.setLastModifiedDate(now));
+        onlineShoppingItems.forEach(item -> {
+            if(item.getLastModifiedDate() == null) {
+                item.setLastModifiedDate(now);
+            }
+        });
 
         // Set ttl
         onlineShoppingItems.forEach(item -> item.setTtl(99999999L));
 
         // batchSave creates items if they do not exist by checking its primary key.
         // It will update items if they do exist.
-        final var failedBatches = new DynamoDBMapper(amazonDynamoDB).batchSave(onlineShoppingItems);
-        if(!failedBatches.isEmpty()) {
-            throw new WebscraperException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to update items=" + onlineShoppingItems);
-        }
+        return new DynamoDBMapper(amazonDynamoDB).batchSave(onlineShoppingItems);
+
     }
 
     public List<OnlineShoppingItem> getOnlineShoppingItemsByUser(final String userId) {

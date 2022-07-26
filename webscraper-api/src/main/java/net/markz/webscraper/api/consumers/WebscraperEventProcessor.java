@@ -33,7 +33,7 @@ public class WebscraperEventProcessor extends AbstractEventProcessor<OnlineShopp
 
     @Autowired
     public WebscraperEventProcessor(
-            final WebscraperEventErrorHandler errorHandler,
+            final WebscraperEventExceptionHandler errorHandler,
             final AmazonSQS amazonSQS,
             final SearchService searchService,
             final Environment env,
@@ -55,10 +55,6 @@ public class WebscraperEventProcessor extends AbstractEventProcessor<OnlineShopp
      */
     @Override
     public void processMessage(final Message<OnlineShoppingItemDto> message) {
-        log.info("Processing message={}", message);
-
-
-
         message.getData().forEach(dto -> {
             // Scrape item in message body by exact item name
             final var searchResult = searchService.scrapeSearchResults(
@@ -149,7 +145,7 @@ public class WebscraperEventProcessor extends AbstractEventProcessor<OnlineShopp
      */
     @Override
     public String getLockKey(OnlineShoppingItemDto obj) {
-        return null;
+        return "online-shopping-item-lock-key-" + obj.getUuid();
     }
 
     private static ExecutorService buildExecutorService() {
@@ -157,6 +153,7 @@ public class WebscraperEventProcessor extends AbstractEventProcessor<OnlineShopp
                 .Builder()
                 .namingPattern(SQSConsumerLambda.class.getSimpleName() + "-%d")
                 .build();
+
         return new ThreadPoolExecutor(
                 10,
                 50,

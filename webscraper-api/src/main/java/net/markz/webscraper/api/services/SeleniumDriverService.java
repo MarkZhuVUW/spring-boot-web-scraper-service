@@ -2,7 +2,6 @@ package net.markz.webscraper.api.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.markz.webscraper.api.constants.NetworkConstants;
 import net.markz.webscraper.api.exceptions.WebscraperException;
 import net.markz.webscraper.api.utils.Utils;
 import org.openqa.selenium.WebDriver;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
 
 @Service
 @Slf4j
@@ -49,9 +47,8 @@ public class SeleniumDriverService {
     log.debug("Getting new chrome driver instance");
 
 
-    final String remoteUrlChrome = Arrays.stream(env.getActiveProfiles()).toList().contains("local") ?
-            NetworkConstants.LOCAL_SELENIUM_HOST_NAME.getStr() :
-            NetworkConstants.ECS_SELENINUM_HOST_NAME.getStr();
+    final String remoteUrlChrome = env.getProperty("selenium.url");
+
     final ChromeOptions opts = new ChromeOptions();
 
     opts.addArguments("--no-sandbox"); // Bypass OS security model
@@ -86,7 +83,7 @@ public class SeleniumDriverService {
               openWindowTabs.size()
       );
       for (int i = 0; i < openWindowTabs.size() - 1; i++) {
-        driver.close(); // close most tabs but leave one to ensure browser is still open for reusing.
+        driver.close(); // close all tabs but one to ensure browser is still open for reusing and it consumes less memory.
       }
       log.debug("Number of open tabs after cleaning: {} ", openWindowTabs.size());
     }

@@ -23,6 +23,9 @@ management:
       exposure:
         include: '*'
       base-path: '/actuator'
+
+selenium:
+  url: http://localhost:4444/wd/hub
 amazon:
   region: ap-southeast-2
   sqs:

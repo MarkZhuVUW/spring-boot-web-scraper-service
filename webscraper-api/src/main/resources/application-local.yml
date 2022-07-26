@@ -24,6 +24,9 @@ management:
         include: '*'
       base-path: '/actuator'
 
+selenium:
+  url: http://selenium-remote-chrome-driver-service:4444/wd/hub
+
 amazon:
   region: ap-southeast-2
   sqs:

@@ -122,7 +122,7 @@
           }
         }
       },
-      "patch": {
+      "put": {
         "tags": [
           "search"
         ],
@@ -356,9 +356,6 @@
       "OnlineShopDto": {
         "type": "string",
         "enum": [
-          "COUNTDOWN",
-          "PET_CO",
-          "THE_WAREHOUSE",
           "GOOGLE_SHOPPING"
         ]
       },

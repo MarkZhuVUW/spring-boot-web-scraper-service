@@ -41,9 +41,9 @@ public abstract class AbstractEventProcessor<T> {
     }
 
     private void processMessage(final SQSEvent.SQSMessage message) {
-        getLogger().info("Parsing message body={}", message);
+        getLogger().debug("Parsing message body={}", message);
         final var parsedMessage = parseMessage(message);
-        getLogger().info("Parsed message={}", parsedMessage);
+        getLogger().debug("Parsed message={}", parsedMessage);
 
 //        final var lockValue = distributedLockService.tryLock(getLockKey(parsedMessage.getData()), getLockTimeout());
 
@@ -51,8 +51,14 @@ public abstract class AbstractEventProcessor<T> {
             if(shouldIgnoreMessage(parsedMessage)) {
                 getLogger().info("Message received and ignored. Stop processing message body={}", message.getBody());
             }
+            getLogger().debug("Processing message={}", parsedMessage);
             processMessage(parsedMessage);
+            getLogger().debug("Processed message={}", parsedMessage);
+
+            getLogger().debug("Acknowledging message={}", parsedMessage);
             acknowledge(message);
+            getLogger().debug("Acknowledged message={}", parsedMessage);
+
         } catch(final Exception e) {
             getLogger().error("Failed processing message={}. Exception thrown: {}", message, e);
             errorHandler.replayMessage(message);

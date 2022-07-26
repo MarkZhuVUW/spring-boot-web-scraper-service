@@ -33,7 +33,13 @@ public class SearchService {
       throw new WebscraperException(HttpStatus.BAD_REQUEST, "Duplicate item detected. Aborting item creation.");
     }
 
-    searchDao.upsertOnlineShoppingItems(onlineShoppingItemDtos.stream().map(DtoDataParser::parseDto).toList());
+    final var failedBatches = searchDao.upsertOnlineShoppingItems(onlineShoppingItemDtos.stream().map(DtoDataParser::parseDto).toList());
+
+
+    if(!failedBatches.isEmpty()) {
+      failedBatches.forEach(failedBatch -> log.error("failed items={}, exception thrown={}", failedBatch.getUnprocessedItems(), failedBatch.getException().toString()));
+      throw new WebscraperException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to update items=" + onlineShoppingItemDtos);
+    }
   }
 
   public OnlineShoppingItemDto getOnlineShoppingItem(final OnlineShoppingItemDto onlineShoppingItemDto) {

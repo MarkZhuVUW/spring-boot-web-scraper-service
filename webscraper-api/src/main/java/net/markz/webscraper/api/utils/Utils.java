@@ -23,9 +23,6 @@ public final record Utils() {
     }
     public static SearchUrl getSearchUrl(final OnlineShopDto onlineShopDto) {
         return switch (onlineShopDto) {
-            case COUNTDOWN -> SearchUrl.COUNTDOWN;
-            case PET_CO -> SearchUrl.PET_CO;
-            case THE_WAREHOUSE -> SearchUrl.THE_WAREHOUSE;
             case GOOGLE_SHOPPING -> SearchUrl.GOOGLE_SHOPPING;
         };
     }

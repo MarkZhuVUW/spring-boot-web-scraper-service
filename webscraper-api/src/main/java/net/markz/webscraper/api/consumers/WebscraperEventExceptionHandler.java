@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class WebscraperEventErrorHandler extends AbstractEventErrorHandler {
+public class WebscraperEventExceptionHandler extends AbstractEventErrorHandler {
 
     @Autowired
     private Environment env;
@@ -25,7 +25,7 @@ public class WebscraperEventErrorHandler extends AbstractEventErrorHandler {
     private final AmazonSQS amazonSQS;
 
     @Autowired
-    public WebscraperEventErrorHandler(
+    public WebscraperEventExceptionHandler(
             final Environment env,
             final AmazonSQS amazonSQS
     ) {

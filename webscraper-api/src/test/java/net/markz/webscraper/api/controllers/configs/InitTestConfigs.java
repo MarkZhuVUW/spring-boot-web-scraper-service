@@ -27,7 +27,6 @@ public class InitTestConfigs extends ITBase {
     @Bean
     AmazonDynamoDB initializeAmazonDynamoDB() {
 
-        log.debug("Creating dynamodb client");
         final AmazonDynamoDB amazonDynamoDB = AmazonDynamoDBClientBuilder
                 .standard()
                 .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(
@@ -35,7 +34,6 @@ public class InitTestConfigs extends ITBase {
                         , "ap-southeast-2"
                 ))
                 .build();
-        log.debug("Created dynamodb client");
 
 
         createTable(amazonDynamoDB);

@@ -19,7 +19,9 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -42,13 +44,18 @@ public class SQSService {
 
         final var objectMapper = new JsonMapper();
 
+        final var now = LocalDateTime.now();
+
         onlineShoppingItemDtos
                 .parallelStream() // Concurrently send messages to sqs queue as we follow an eventually consistent mechanism.
                 .forEach(
                         dto -> {
+                            // update last modified date
+                            dto.setLastModifiedDate(now.toString());
                             final var message = new Message<OnlineShoppingItemDto>();
                             message.setEventType(EventType.CRON_ITEM_UPDATE_AND_PRICE_CHANGE_ALERT.name());
                             message.setData(List.of(dto));
+                            message.setMsgId(UUID.randomUUID());
 
                             try {
                                 final var strMessage = objectMapper.writeValueAsString(message);
