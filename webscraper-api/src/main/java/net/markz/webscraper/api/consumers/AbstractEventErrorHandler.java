@@ -65,16 +65,17 @@ public abstract class AbstractEventErrorHandler {
         final var replayTimes = getReplayTimes(message);
         getLogger().info("Sending message={} back to queue. Current replay times={}", message, replayTimes);
 
-        final var req =
-                new SendMessageRequest()
-                        .withQueueUrl(this.sqsQueueUrl)
-                        .withMessageBody(message.getBody())
-                        .withDelaySeconds(Integer.parseInt(Constants.LAMBDA_REPLAY_DELAY_SECONDS.getStr()))
-                        .addMessageAttributesEntry(
-                                Constants.LAMBDA_REPLAY_TIMES_ATTRIBUTE.getStr(),
-                                new MessageAttributeValue()
-                                        .withStringValue(String.valueOf(replayTimes + 1))
-                        );
+    final var req =
+        new SendMessageRequest()
+            .withQueueUrl(this.sqsQueueUrl)
+            .withMessageBody(message.getBody())
+            .withDelaySeconds(Integer.parseInt(Constants.LAMBDA_REPLAY_DELAY_SECONDS.getStr()))
+            .addMessageAttributesEntry(
+                    Constants.LAMBDA_REPLAY_TIMES_ATTRIBUTE.getStr(),
+                    new MessageAttributeValue()
+                            .withStringValue(String.valueOf(replayTimes + 1))
+                            .withDataType("Number")
+            );
         amazonSQS.sendMessage(req);
         getLogger().info("Message={} is sent to the queue and will be replayed.", message);
     }

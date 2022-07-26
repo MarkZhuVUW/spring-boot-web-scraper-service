@@ -13,12 +13,13 @@ public class CorsConfigurer implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
 
         log.debug("Adding cors mapping");
+
         registry.addMapping("/**")
                 .allowedOrigins(
                         "http://localhost:4000","https://markz-portfolio.uk")
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "HEAD")
-                .allowCredentials(true)
-        ;
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS")
+                .allowCredentials(true);
+
         log.debug("Added cors mapping");
 
     }

@@ -296,12 +296,12 @@
         }
       }
     },
-    "/sqs/produce/onlineshoppingitems": {
+    "/sqsMessages/onlineShoppingItems": {
       "post": {
         "tags": [
           "sqs"
         ],
-        "description": "Push onlineShoppingItem messages to SQS queue.",
+        "description": "get onlineShoppingItems and push them as messages to SQS queue.",
         "operationId": "sqsProduce",
 
         "responses": {
@@ -322,14 +322,12 @@
             }
           }
         }
-      }
-    },
-    "/sqs/poll/onlineshoppingitems": {
-      "post": {
+      },
+      "put": {
         "tags": [
           "sqs"
         ],
-        "description": "Poll onlineShoppingItem messages from SQS queue.",
+        "description": "Poll onlineShoppingItem messages from SQS queue and update onlineShoppingItems",
         "operationId": "sqsPoll",
 
         "responses": {
@@ -395,6 +393,10 @@
           "userId": {
             "type": "string",
             "description": "Unique id of the user."
+          },
+          "lastModifiedDate": {
+            "type": "string",
+            "description": "last modified date."
           }
         }
       },

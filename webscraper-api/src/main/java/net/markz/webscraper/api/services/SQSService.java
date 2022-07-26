@@ -2,6 +2,7 @@ package net.markz.webscraper.api.services;
 
 import com.amazonaws.services.lambda.runtime.events.SQSEvent;
 import com.amazonaws.services.sqs.AmazonSQS;
+import com.amazonaws.services.sqs.model.MessageAttributeValue;
 import com.amazonaws.services.sqs.model.SendMessageRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
@@ -10,9 +11,9 @@ import lombok.extern.slf4j.Slf4j;
 import net.markz.webscraper.api.constants.Constants;
 import net.markz.webscraper.api.consumers.WebscraperEventProcessor;
 import net.markz.webscraper.api.exceptions.WebscraperException;
-import net.markz.webscraper.api.parsers.DtoDataParser;
 import net.markz.webscraper.api.sqs.EventType;
 import net.markz.webscraper.api.sqs.Message;
+import net.markz.webscraper.model.OnlineShoppingItemDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
@@ -37,39 +38,40 @@ public class SQSService {
     public void sqsProduce() {
         final var queueUrl = env.getProperty("amazon.sqs.queue.url");
 
-        final var onlineShoppingItems = searchService.getOnlineShoppingItems();
+        final var onlineShoppingItemDtos = searchService.getOnlineShoppingItems();
 
         final var objectMapper = new JsonMapper();
 
-    onlineShoppingItems
-        .parallelStream() // Concurrently send messages to sqs queue as we follow an eventually
-        // consistent mechanism
-        .map(DtoDataParser::parseDto)
-        .forEach(
-            item -> {
-              final var message =
-                  Message.builder()
-                      .eventType(EventType.CRON_ITEM_UPDATE_AND_PRICE_CHANGE_ALERT.name())
-                      .data(List.of(item))
-                      .build();
-              try {
-                final var strMessage = objectMapper.writeValueAsString(message);
-                log.info("Sending stringified message={}", message);
+        onlineShoppingItemDtos
+                .parallelStream() // Concurrently send messages to sqs queue as we follow an eventually consistent mechanism.
+                .forEach(
+                        dto -> {
+                            final var message = new Message<OnlineShoppingItemDto>();
+                            message.setEventType(EventType.CRON_ITEM_UPDATE_AND_PRICE_CHANGE_ALERT.name());
+                            message.setData(List.of(dto));
 
-                final var sendMsgReq =
-                    new SendMessageRequest()
-                        .withQueueUrl(queueUrl)
-                        .withMessageBody(strMessage)
-                        .withDelaySeconds(
-                            Integer.parseInt(Constants.LAMBDA_REPLAY_DELAY_SECONDS.getStr()));
-                amazonSQS.sendMessage(sendMsgReq);
-                log.info("Sent message={}", message);
-              } catch (JsonProcessingException e) {
-                throw new WebscraperException(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    String.format("Message=%s cannot be parsed to string", message));
-              }
-            });
+                            try {
+                                final var strMessage = objectMapper.writeValueAsString(message);
+                                log.info("Sending stringified message={}", strMessage);
+
+                                final var sendMsgReq =
+                                        new SendMessageRequest()
+                                                .withQueueUrl(queueUrl)
+                                                .withMessageBody(strMessage)
+                                                .addMessageAttributesEntry(
+                                                        Constants.LAMBDA_REPLAY_TIMES_ATTRIBUTE.getStr(),
+                                                        new MessageAttributeValue().withStringValue("0").withDataType("Number")
+                                                )
+                                                .withDelaySeconds(
+                                                        Integer.parseInt(Constants.LAMBDA_REPLAY_DELAY_SECONDS.getStr()));
+                                amazonSQS.sendMessage(sendMsgReq);
+                                log.info("Sent message={}", strMessage);
+                            } catch (JsonProcessingException e) {
+                                throw new WebscraperException(
+                                        HttpStatus.INTERNAL_SERVER_ERROR,
+                                        String.format("Message=%s cannot be parsed to string", message));
+                            }
+                        });
     }
 
     /**
@@ -83,6 +85,7 @@ public class SQSService {
         final var messages = amazonSQS.receiveMessage(queueUrl).getMessages();
 
         // Hardcode it to lambda SQSMessage in order to use the lambda processor.
+        // TODO: refactor this when this is moved to a lambda function.
         final var lambdaSQSMessages = messages
                 .stream()
                 .map(msg -> {

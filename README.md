@@ -3,4 +3,5 @@
 <img src="https://img.shields.io/docker/pulls/zdy120939259/web-scraper-service"/>
 <img src="https://img.shields.io/docker/stars/zdy120939259/web-scraper-service.svg"/>
 # spring-boot-web-scraper-service
-java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb
+
+{"eventType":"CRON_ITEM_UPDATE_AND_PRICE_CHANGE_ALERT","timestamp":0,"data":[{"onlineShop":null,"onlineShopName":"GOOGLE_SHOPPING","salePrice":null,"name":"testItem1","isSaved":null,"imageUrl":null,"href":null,"uuid":"testUUID1","userId":"markz","lastModifiedDate":"2022-07-27T02:18:07.202383200"}]}

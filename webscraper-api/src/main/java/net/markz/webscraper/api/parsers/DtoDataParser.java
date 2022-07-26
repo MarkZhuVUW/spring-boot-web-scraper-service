@@ -3,6 +3,8 @@ package net.markz.webscraper.api.parsers;
 import net.markz.webscraper.api.daos.searchdao.OnlineShoppingItem;
 import net.markz.webscraper.model.OnlineShoppingItemDto;
 
+import java.time.LocalDateTime;
+
 public record DtoDataParser() {
 
     public static OnlineShoppingItem parseDto(OnlineShoppingItemDto onlineShoppingItemDto) {
@@ -17,6 +19,11 @@ public record DtoDataParser() {
                 .onlineShopName(onlineShoppingItemDto.getOnlineShopName())
                 .uuid(onlineShoppingItemDto.getUuid())
                 .userId(onlineShoppingItemDto.getUserId())
+                .lastModifiedDate(
+                        onlineShoppingItemDto.getLastModifiedDate() != null ?
+                                LocalDateTime.parse(onlineShoppingItemDto.getLastModifiedDate()) :
+                                null
+                )
                 .build();
     }
 
@@ -30,6 +37,7 @@ public record DtoDataParser() {
                 .onlineShop(onlineShoppingItem.getOnlineShop())
                 .onlineShopName(onlineShoppingItem.getOnlineShopName())
                 .uuid(onlineShoppingItem.getUuid())
-                .userId(onlineShoppingItem.getUserId());
+                .userId(onlineShoppingItem.getUserId())
+                .lastModifiedDate(onlineShoppingItem.getLastModifiedDate().toString());
     }
 }

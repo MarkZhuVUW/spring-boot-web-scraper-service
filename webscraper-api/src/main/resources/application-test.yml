@@ -23,10 +23,7 @@ management:
       exposure:
         include: '*'
       base-path: '/actuator'
-  metrics:
-    export:
-      graphite:
-        enabled: false
+
 amazon:
   region: ap-southeast-2
   sqs:

@@ -32,15 +32,12 @@ public abstract class AbstractEventProcessor<T> {
     public void processEvent(final SQSEvent sqsEvent) {
         final var futures = sqsEvent.getRecords()
                 .stream()
-                .map(msg -> executorService.submit(
-                        () -> processMessage(msg)
-                ))
+                .map(msg -> executorService.submit(() -> processMessage(msg)))
                 .toList();
 
         for (var future : futures) {
             future.get();
         }
-
     }
 
     private void processMessage(final SQSEvent.SQSMessage message) {
@@ -51,14 +48,12 @@ public abstract class AbstractEventProcessor<T> {
 //        final var lockValue = distributedLockService.tryLock(getLockKey(parsedMessage.getData()), getLockTimeout());
 
         try {
-
-
             if(shouldIgnoreMessage(parsedMessage)) {
                 getLogger().info("Message received and ignored. Stop processing message body={}", message.getBody());
             }
             processMessage(parsedMessage);
             acknowledge(message);
-        } catch(Exception e) {
+        } catch(final Exception e) {
             getLogger().error("Failed processing message={}. Exception thrown: {}", message, e);
             errorHandler.replayMessage(message);
         } finally {

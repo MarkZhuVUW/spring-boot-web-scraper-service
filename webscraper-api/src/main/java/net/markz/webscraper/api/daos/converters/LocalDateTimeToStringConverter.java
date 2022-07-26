@@ -17,9 +17,12 @@
 package net.markz.webscraper.api.daos.converters;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTypeConverter;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
+
+@Component
 public class LocalDateTimeToStringConverter implements DynamoDBTypeConverter<String, LocalDateTime> {
 
     @Override

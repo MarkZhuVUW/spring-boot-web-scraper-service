@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#sed -i 's/\r$//'
+sed -i 's/\r$//'
 set -e
 clear
 

@@ -5,7 +5,6 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import net.markz.webscraper.api.SearchApiDelegate;
 import net.markz.webscraper.api.services.SearchService;
-import net.markz.webscraper.api.utils.Utils;
 import net.markz.webscraper.model.CreateOnlineShoppingItemsRequest;
 import net.markz.webscraper.model.DeleteOnlineShoppingItemsRequest;
 import net.markz.webscraper.model.GetOnlineShoppingItemResponse;
@@ -32,47 +31,38 @@ public class SearchController implements SearchApiDelegate {
     public ResponseEntity<GetOnlineShoppingItemsResponse> scrapeSearchResults(
             @NonNull final OnlineShopDto onlineShopName,
             @NonNull final String searchString) {
-        return Utils.handleException(
-                () ->
-                        new GetOnlineShoppingItemsResponse()
-                                .data(searchService.scrapeSearchResults(onlineShopName, searchString))
+        return ResponseEntity.ok(new GetOnlineShoppingItemsResponse()
+                .data(searchService.scrapeSearchResults(onlineShopName, searchString))
         );
     }
 
     @Override
     public ResponseEntity<GetOnlineShoppingItemsResponse> getOnlineShoppingItems() {
-        return Utils.handleException(
-                () ->
-                        new GetOnlineShoppingItemsResponse()
-                                .data(searchService.getOnlineShoppingItems())
+        return ResponseEntity.ok(
+                new GetOnlineShoppingItemsResponse()
+                .data(searchService.getOnlineShoppingItems())
         );
     }
 
     @Override
     public ResponseEntity<Void> createOnlineShoppingItems(
             final CreateOnlineShoppingItemsRequest createOnlineShoppingItemsRequest) {
-        return Utils.handleException(() -> {
-            searchService.createOnlineShoppingItems(createOnlineShoppingItemsRequest.getData());
-            return null;
-        });
+        searchService.createOnlineShoppingItems(createOnlineShoppingItemsRequest.getData());
+        return ResponseEntity.ok(null);
     }
 
     @Override
     public ResponseEntity<Void> updateOnlineShoppingItems(
             final UpdateOnlineShoppingItemsRequest updateOnlineShoppingItemsRequest) {
-        return Utils.handleException(() -> {
-            searchService.updateOnlineShoppingItems(updateOnlineShoppingItemsRequest.getData());
-            return null;
-        });
+        searchService.updateOnlineShoppingItems(updateOnlineShoppingItemsRequest.getData());
+        return ResponseEntity.ok(null);
     }
 
     @Override
     public ResponseEntity<Void> deleteOnlineShoppingItems(
             final DeleteOnlineShoppingItemsRequest deleteOnlineShoppingItemsRequest) {
-        return Utils.handleException(() -> {
-            searchService.deleteOnlineShoppingItems(deleteOnlineShoppingItemsRequest.getData());
-            return null;
-        });
+        searchService.deleteOnlineShoppingItems(deleteOnlineShoppingItemsRequest.getData());
+        return ResponseEntity.ok(null);
     }
 
 
@@ -82,11 +72,8 @@ public class SearchController implements SearchApiDelegate {
             final String name,
             final UpdateOnlineShoppingItemRequest updateOnlineShoppingItemRequest
     ) {
-        return Utils.handleException(
-                () -> {
-                    searchService.updateOnlineShoppingItems(List.of(updateOnlineShoppingItemRequest.getData()));
-                    return null;
-                });
+        searchService.updateOnlineShoppingItems(List.of(updateOnlineShoppingItemRequest.getData()));
+        return ResponseEntity.ok(null);
     }
 
     @Override
@@ -94,14 +81,13 @@ public class SearchController implements SearchApiDelegate {
             final String shopName,
             final String name
     ) {
-        return Utils.handleException(
-                () ->
-                        new GetOnlineShoppingItemResponse()
-                                .data(searchService.getOnlineShoppingItem(
-                                        new OnlineShoppingItemDto()
-                                                .onlineShopName(shopName)
-                                                .name(name)
-                                ))
+        return ResponseEntity.ok(
+                new GetOnlineShoppingItemResponse()
+                        .data(searchService.getOnlineShoppingItem(
+                                new OnlineShoppingItemDto()
+                                        .onlineShopName(shopName)
+                                        .name(name)
+                        ))
         );
     }
 }
