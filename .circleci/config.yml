@@ -88,15 +88,12 @@ workflows:
       - deploy-to-docker-hub:
           requires:
             - testnbuild
-          filters:
-            branches:
-              only: master
       - deploy-jar-to-github-releases:
           requires:
             - testnbuild
-          filters:
-            branches:
-              only: master
+#          filters:
+#            branches:
+#              only: master
       - deploy-ecs:
           requires:
             - testnbuild
