@@ -50,6 +50,7 @@ public abstract class AbstractEventProcessor<T> {
         try {
             if(shouldIgnoreMessage(parsedMessage)) {
                 getLogger().info("Message received and ignored. Stop processing message body={}", message.getBody());
+                return;
             }
             getLogger().debug("Processing message={}", parsedMessage);
             processMessage(parsedMessage);

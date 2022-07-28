@@ -17,9 +17,9 @@ import org.springframework.stereotype.Component;
 public abstract class AbstractEventErrorHandler {
 
 
-    private final String sqsQueueUrl;
+    private final String queueUrl;
     private final AmazonSQS amazonSQS;
-    private final String deadLetterQueueUrl;
+    private final String dlqUrl;
 
     public abstract Logger getLogger();
 
@@ -55,7 +55,7 @@ public abstract class AbstractEventErrorHandler {
 
     private void sendToDLQ(SQSEvent.SQSMessage message) {
         final var req = new SendMessageRequest()
-                .withQueueUrl(this.deadLetterQueueUrl)
+                .withQueueUrl(this.dlqUrl)
                 .withMessageBody(message.getBody());
         amazonSQS.sendMessage(req);
         getLogger().info("Message={} is sent to DLQ.", message);
@@ -67,7 +67,7 @@ public abstract class AbstractEventErrorHandler {
 
     final var req =
         new SendMessageRequest()
-            .withQueueUrl(this.sqsQueueUrl)
+            .withQueueUrl(this.queueUrl)
             .withMessageBody(message.getBody())
             .withDelaySeconds(Integer.parseInt(Constants.LAMBDA_REPLAY_DELAY_SECONDS.getStr()))
             .addMessageAttributesEntry(

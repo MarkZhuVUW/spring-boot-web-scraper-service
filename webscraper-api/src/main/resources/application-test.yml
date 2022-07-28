@@ -1,0 +1,9 @@
+amazon:
+  region: ap-southeast-2
+  sqs:
+    queue:
+      url: https://sqs.ap-southeast-2.amazonaws.com/142621353074/test
+      name: test
+    dlq:
+      url: https://sqs.ap-southeast-2.amazonaws.com/142621353074/test-dlq
+      name: test-dlq

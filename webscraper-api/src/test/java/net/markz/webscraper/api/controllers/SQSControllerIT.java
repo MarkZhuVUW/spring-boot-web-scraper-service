@@ -17,12 +17,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import static net.markz.webscraper.api.controllers.TestUtils.createQueue;
 import static net.markz.webscraper.api.controllers.TestUtils.createTable;
 import static net.markz.webscraper.api.controllers.TestUtils.emptyQueue;
+import static net.markz.webscraper.api.controllers.TestUtils.produceMessageFromDto;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -36,6 +38,7 @@ class SQSControllerIT extends ITBase {
     @Autowired
     private SQSController sqsController;
 
+    @Autowired
     private SearchController searchController;
 
     @Autowired
@@ -57,10 +60,6 @@ class SQSControllerIT extends ITBase {
         queueUrl = System.getProperty("amazon.sqs.queue.url");
         dlqUrl = System.getProperty("amazon.sqs.dlq.url");
 
-        await().atMost(15, TimeUnit.SECONDS).pollInterval(1, TimeUnit.SECONDS).untilAsserted(() -> {
-            assertTrue(emptyQueue(amazonSQS, queueUrl));
-            assertTrue(emptyQueue(amazonSQS, dlqUrl));
-        });
 
     }
 
@@ -71,9 +70,19 @@ class SQSControllerIT extends ITBase {
     }
 
 
+    private void assertEmptyQueues() {
+        await().atMost(15, TimeUnit.SECONDS).pollInterval(1, TimeUnit.SECONDS).untilAsserted(() -> {
+            assertTrue(emptyQueue(amazonSQS, queueUrl));
+            assertTrue(emptyQueue(amazonSQS, dlqUrl));
+            assertTrue(amazonSQS.receiveMessage(new ReceiveMessageRequest().withQueueUrl(queueUrl)).getMessages().isEmpty());
+            assertTrue(amazonSQS.receiveMessage(new ReceiveMessageRequest().withQueueUrl(dlqUrl)).getMessages().isEmpty());
+        });
+    }
     @Test
     void poll_updateOnlineShoppingItems_success() throws InterruptedException {
         // Given
+        // empty queues.
+        assertEmptyQueues();
 
         final var item1 = new OnlineShoppingItemDto()
                 .onlineShopName(OnlineShopDto.GOOGLE_SHOPPING.name())
@@ -81,33 +90,12 @@ class SQSControllerIT extends ITBase {
                 .onlineShop(OnlineShopDto.GOOGLE_SHOPPING)
                 .uuid("testUUID1")
                 .name("testItem1");
-
-        final var createReq = new CreateOnlineShoppingItemsRequest()
-                .addDataItem(item1);
-
-        ResponseEntity<Void> createResp = searchController.createOnlineShoppingItems(createReq);
-
-        final var items = Objects.requireNonNull(
-                searchController
-                        .getOnlineShoppingItems()
-                        .getBody()
-        ).getData();
-
-        assertEquals(HttpStatus.OK, createResp.getStatusCode());
-        assertEquals(1, items.size());
-        assertEquals(item1.getUuid(), items.get(0).getUuid());
-        assertEquals(item1.getName(), items.get(0).getName());
-
-        item1.setSalePrice("123");
-        item1.setHref("123");
-
-        Thread.sleep(100L);
-
+        createItem(item1);
         // The created item will be parsed to message and pushed to SQS
         sqsController.sqsProduce();
 
+        Thread.sleep(5 * 1000L);
 
-//        when(seleniumDriverService.)
         // when
         sqsController.sqsPoll();
 
@@ -121,7 +109,6 @@ class SQSControllerIT extends ITBase {
             assertEquals(item1.getName(), dbItem.getName());
             assertEquals(item1.getUserId(), dbItem.getUserId());
             assertEquals(item1.getUuid(), dbItem.getUuid());
-
         });
     }
 
@@ -129,39 +116,28 @@ class SQSControllerIT extends ITBase {
     @Test
     void poll_updateOnlineShoppingItems_lastModifiedDateBefore_fail() throws InterruptedException {
         // Given
+        // empty queues.
+        assertEmptyQueues();
 
         final var item1 = new OnlineShoppingItemDto()
                 .onlineShopName(OnlineShopDto.GOOGLE_SHOPPING.name())
                 .userId(USERID)
                 .onlineShop(OnlineShopDto.GOOGLE_SHOPPING)
                 .uuid("testUUID1")
-                .lastModifiedDate(LocalDateTime.of(1000, 1, 1, 1, 1, 1).toString())
                 .name("testItem1");
+        createItem(item1);
+        // push message to sqs queue with a last modified date earlier than existing item.
+        item1.setLastModifiedDate(LocalDateTime.of(
+                1000,
+                1,
+                1,
+                1,
+                1,
+                1
+        ).toString());
+        produceMessageFromDto(List.of(item1), amazonSQS, queueUrl);
 
-        final var createReq = new CreateOnlineShoppingItemsRequest()
-                .addDataItem(item1);
-
-        ResponseEntity<Void> createResp = searchController.createOnlineShoppingItems(createReq);
-
-        final var items = Objects.requireNonNull(
-                searchController
-                        .getOnlineShoppingItems()
-                        .getBody()
-        ).getData();
-
-        assertEquals(HttpStatus.OK, createResp.getStatusCode());
-        assertEquals(1, items.size());
-        assertEquals(item1.getUuid(), items.get(0).getUuid());
-        assertEquals(item1.getName(), items.get(0).getName());
-
-        item1.setSalePrice("123");
-        item1.setHref("123");
-
-
-        // The created item will be parsed to message and pushed to SQS
-        sqsController.sqsProduce();
-
-        Thread.sleep(100L);
+        Thread.sleep(5 * 1000L);
 
         // when
         sqsController.sqsPoll();
@@ -180,4 +156,24 @@ class SQSControllerIT extends ITBase {
         });
     }
 
+
+    private void createItem(final OnlineShoppingItemDto item1) {
+
+        final var createReq = new CreateOnlineShoppingItemsRequest()
+                .addDataItem(item1);
+
+        ResponseEntity<Void> createResp = searchController.createOnlineShoppingItems(createReq);
+
+        final var items = Objects.requireNonNull(
+                searchController
+                        .getOnlineShoppingItems()
+                        .getBody()
+        ).getData();
+
+        assertEquals(HttpStatus.OK, createResp.getStatusCode());
+        assertEquals(1, items.size());
+        assertEquals(item1.getUuid(), items.get(0).getUuid());
+        assertEquals(item1.getName(), items.get(0).getName());
+
+    }
 }

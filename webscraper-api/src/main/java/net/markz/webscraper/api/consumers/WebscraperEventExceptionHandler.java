@@ -19,9 +19,6 @@ import org.springframework.stereotype.Component;
 public class WebscraperEventExceptionHandler extends AbstractEventErrorHandler {
 
     @Autowired
-    private Environment env;
-
-    @Autowired
     private final AmazonSQS amazonSQS;
 
     @Autowired

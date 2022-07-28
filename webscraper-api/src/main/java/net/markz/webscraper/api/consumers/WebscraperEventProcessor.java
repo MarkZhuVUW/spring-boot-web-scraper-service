@@ -32,6 +32,9 @@ public class WebscraperEventProcessor extends AbstractEventProcessor<OnlineShopp
     private final SearchService searchService;
 
     @Autowired
+    private Environment env;
+
+    @Autowired
     public WebscraperEventProcessor(
             final WebscraperEventExceptionHandler errorHandler,
             final AmazonSQS amazonSQS,
@@ -63,15 +66,13 @@ public class WebscraperEventProcessor extends AbstractEventProcessor<OnlineShopp
             );
 
             if(searchResult.isEmpty()) {
-                log.info(
-                        "Cannot find item in onlineShopName={}, item name={}",
+                log.error(
+                        "Cannot find item in onlineShopName={}, item name={}. stop processing message={}",
                         dto.getOnlineShop(),
-                        dto.getName()
+                        dto.getName(),
+                        message
                 );
-                throw new WebscraperException(
-                        HttpStatus.BAD_REQUEST,
-                        String.format("Error scraping for message item=%s, will replay later.", dto)
-                );
+                return;
             }
 
 
@@ -119,7 +120,7 @@ public class WebscraperEventProcessor extends AbstractEventProcessor<OnlineShopp
     @Override
     public boolean shouldIgnoreMessage(final Message<OnlineShoppingItemDto> message) {
 
-    return message.getData().stream()
+    return !message.getData().stream()
         .filter(
             dto -> {
               final var messageLastModified = LocalDateTime.parse(dto.getLastModifiedDate());
