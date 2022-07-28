@@ -40,7 +40,7 @@ jobs:
           name: set up env vars and push docker image to Docker Hub
           command: |
             echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin
-            cd ./scripts
+            cd ./deployment
             chmod +x deploy-docker-hub.sh
             ./deploy-docker-hub.sh
 
@@ -54,7 +54,7 @@ jobs:
       - run:
           name: Copy api.jar and client.jar to artifacts folder and release it to GitHub
           command: |
-            cd ./scripts
+            cd ./deployment
             chmod +x deploy-github-releases.sh
             ./deploy-github-releases.sh
   deploy-ecs:
