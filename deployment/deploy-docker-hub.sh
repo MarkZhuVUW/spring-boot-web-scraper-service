@@ -14,6 +14,6 @@ export GITHUB_USERNAME=${GITHUB_USERNAME:=MarkZhuVUW}
 echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
 
 
-docker-compose build
-docker-compose push
+docker build
+docker push
 
