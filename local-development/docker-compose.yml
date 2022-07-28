@@ -4,7 +4,7 @@ services:
     image: zdy120939259/web-scraper-service:latest
     build:
       context: ../
-      dockerfile: ./local-development/Dockerfile
+      dockerfile: ../deployment/Dockerfile
     ports:
       - 80:80
       - 8000:8000
