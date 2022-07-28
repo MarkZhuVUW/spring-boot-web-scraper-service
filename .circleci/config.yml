@@ -78,7 +78,7 @@ jobs:
       - run:
           name: assume role and force update ecs service to get latest change in docker image.
           command: |
-            cd ./scripts
+            ls
             chmod +x deploy-ecs.sh
             ./deploy-ecs.sh
 workflows:
