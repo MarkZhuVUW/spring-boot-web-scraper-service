@@ -1,6 +1,6 @@
 target/
-scripts/app.jar
-scripts/data
+local-development/app.jar
+local-development/data
 .mvn/wrapper/maven-wrapper.jar
 **/src/main/**/target/
 **/src/test/**/target/
