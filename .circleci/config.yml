@@ -21,7 +21,7 @@ jobs:
           name: Copy  files to root folder
           command: |
             cp ./webscraper-api/target/*-exec.jar ./api.jar
-            cp ./webscraper-client/target/*-exec.jar ./client.jar
+            cp ./webscraper-client/target/*-SNAPSHOT.jar ./client.jar
 
       - persist_to_workspace:
           root: ./
