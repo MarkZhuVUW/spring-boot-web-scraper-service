@@ -18,17 +18,16 @@ jobs:
             - ~/.m2
           key: v1-dependencies-{{ checksum "pom.xml" }}
       - run:
-          name: Copy jar files to root folder
+          name: Copy jar files and Dockerfile to root folder
           command: |
             cp ./webscraper-api/target/*-exec.jar ./api.jar
             cp ./webscraper-client/target/*-SNAPSHOT.jar ./client.jar
-
+            cp ./deployment/Dockerfile ./Dockerfile
       - persist_to_workspace:
-          root: ./deployment
+          root: ./
           paths:
             - api.jar
             - client.jar
-
   deploy-to-docker-hub:
     machine:
       image: ubuntu-2004:202111-02
