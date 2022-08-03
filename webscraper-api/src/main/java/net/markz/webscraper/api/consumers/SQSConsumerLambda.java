@@ -5,12 +5,8 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.SQSEvent;
 import net.markz.webscraper.api.configs.SpringContextManager;
 
-import java.util.concurrent.ExecutorService;
-
 public class SQSConsumerLambda implements RequestHandler<SQSEvent, Void> {
 
-
-    private ExecutorService executorService;
 
     @Override
     public Void handleRequest(final SQSEvent event, final Context context) {
