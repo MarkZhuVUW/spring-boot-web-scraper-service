@@ -24,7 +24,7 @@ jobs:
             cp ./webscraper-client/target/*-SNAPSHOT.jar ./client.jar
 
       - persist_to_workspace:
-          root: ./
+          root: ./deployment
           paths:
             - api.jar
             - client.jar
